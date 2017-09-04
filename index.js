@@ -26,8 +26,6 @@ function ShootGame(params) {
     }
 
     function load() {
-        console.log('load', _params, counterDom, counter, container, rootDom, screenSize);
-
         var timer = setInterval(function() {
             createCircle()
         }, _params.displayDelay);
@@ -48,6 +46,7 @@ function ShootGame(params) {
             .attr('cy', center.cy)
             .style('fill', 'red')
             .on('click', function() {
+                explodeAnim(d3.select(this))
                 destroyTarget(d3.select(this.parentNode));
                 addCounter(50);
             });
@@ -56,6 +55,7 @@ function ShootGame(params) {
             .attr('cx', center.cx)
             .attr('cy', center.cy)
             .on('click', function() {
+                explodeAnim(d3.select(this))
                 destroyTarget(d3.select(this.parentNode));
                 addCounter(100);
             });
@@ -71,5 +71,37 @@ function ShootGame(params) {
     function addCounter(value) {
         counter += value;
         counterDom.innerHTML = counter;
+    }
+
+    function explodeAnim(element) {
+        // Get mouse coordinates
+        //var mouse = coord;
+        console.log(element)
+        var mouse = [
+            element.attr('cx'),
+            element.attr('cy')
+        ];
+        // Create many bubbles
+        for (var i = 0; i < Math.floor(Math.random() * 2000) + 1; i++) {
+            // Create random numbers for translation of circles
+            var randomNumber = Math.floor((Math.random() < 0.5 ? -1 : 1) * Math.random() * 100);
+            var randomNumber2 = Math.floor((Math.random() < 0.5 ? -1 : 1) * Math.random() * 50);
+            var color = (Math.floor(Math.random() * 10) % 2 === 0) ? 'black' : 'red';
+            // Create circles
+            container.append('circle')
+                .attr('cx', mouse[0])
+                .attr('cy', mouse[1])
+                .attr('r', Math.random() * 5)
+                .attr('fill', color)
+                .attr('opacity', Math.random() * 5)
+                .transition(d3.easeExp)
+                .duration(500)
+                .attr('transform', 'translate(' + randomNumber +
+                    ',' + randomNumber2 + ')')
+                .attr('opacity', 0)
+                .on('end', function() {
+                    d3.select(this).remove()
+                });
+        }
     }
 }
