@@ -69,33 +69,30 @@ function ShootGame(params) {
             cy: Math.floor(Math.random() * screenSize.h / 2)
         };
         var group = container.append('g');
-        // var destination = (_params.isMoving) ? 
-        //.attr('transform', 'translate(' + center.cx + Math.floor(Math.random() * 50) + ',' + center.cy + Math.floor(Math.random() * 50) + ')')
 
-        group.attr('transform', 'translate(' + center.cx + ',' + center.cy + ')')
+        group
             .transition().duration(_params.removeAfter * 5)
-            .attr('transform', 'translate(' + randomDest('x') + ',' + randomDest('y') + ')')
             .on('end', function() {
                 d3.select(this).remove();
             })
         var outter = group.append('circle')
             .attr('r', 20)
-            // .attr('cx', center.cx)
-            // .attr('cy', center.cy)
+            .attr('cx', center.cx)
+            .attr('cy', center.cy)
             .style('fill', 'red')
             .on('click', function() {
                 var val = 50;
-                explodeAnim(d3.select(this.parentNode), val);
+                explodeAnim(d3.select(this), val);
                 destroyTarget(d3.select(this.parentNode));
                 addCounter(val);
             });
         var inner = group.append('circle')
             .attr('r', 10)
-            // .attr('cx', center.cx)
-            // .attr('cy', center.cy)
+            .attr('cx', center.cx)
+            .attr('cy', center.cy)
             .on('click', function() {
                 var val = 100;
-                explodeAnim(d3.select(this.parentNode), val)
+                explodeAnim(d3.select(this), val)
                 destroyTarget(d3.select(this.parentNode));
                 addCounter(val);
             });
@@ -115,13 +112,11 @@ function ShootGame(params) {
     }
 
     function explodeAnim(element, value) {
-        var transform = element.attr('transform').replace('translate(', '').replace(')', '');
-        var mouse = transform.split(',');
 
-        // var mouse = [
-        //     element.attr('cx'),
-        //     element.attr('cy')
-        // ];
+        var mouse = [
+            element.attr('cx'),
+            element.attr('cy')
+        ];
 
         container.append('text')
             .attr('x', Number(mouse[0]) + 20)
