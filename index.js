@@ -88,8 +88,7 @@ function ShootGame(params) {
             cy: randomDest('y')
         }
 
-        group
-            .transition().duration(_params.removeAfter)
+        group.transition().duration(_params.removeAfter)
             .on('end', function() {
                 d3.select(this).remove();
             })
@@ -116,40 +115,8 @@ function ShootGame(params) {
                 ring.transition(d3.expOut).duration(_params.removeAfter)
                 .attr('cx', dest.cx)
                 .attr('cy', dest.cy);
-            }
-            
+            }            
         }
-           
-        
-
-        // var outter = group.append('circle')
-        //     .on('click, mousedown', function() {
-        //         var val = 50;
-        //         explodeAnim(d3.select(this), val);
-        //         destroyTarget(d3.select(this.parentNode));
-        //         addCounter(val);
-        //     })
-        //     .attr('r', 20)
-        //     .attr('cx', center.cx)
-        //     .attr('cy', center.cy)
-        //     .style('fill', 'red')
-        //     .transition(d3.expOut).duration(_params.removeAfter)
-        //     .attr('cx', dest.cx)
-        //     .attr('cy', dest.cy);
-
-        // var inner = group.append('circle')
-        //     .on('click, mousedown', function() {
-        //         var val = 100;
-        //         explodeAnim(d3.select(this), val)
-        //         destroyTarget(d3.select(this.parentNode));
-        //         addCounter(val);
-        //     })
-        //     .attr('r', 10)
-        //     .attr('cx', center.cx)
-        //     .attr('cy', center.cy)
-        //     .transition(d3.expOut).duration(_params.removeAfter)
-        //     .attr('cx', dest.cx)
-        //     .attr('cy', dest.cy);
     }
 
     function destroyTarget(element) {
@@ -165,18 +132,25 @@ function ShootGame(params) {
         counterDom.innerHTML = counter;
     }
 
+    /**
+     * 
+     * @param {d3 element} element 
+     * @param {Number} value - value of the ring touched
+     */
     function explodeAnim(element, value) {
 
         var mouse = [
             element.attr('cx'),
             element.attr('cy')
         ];
-
+        // use the indice to multiply effect depending of the accuracy
+        var indice = getIndexFromValue(value);
+      
         container.append('text')
             .attr('x', Number(mouse[0]) + 20)
             .attr('y', Number(mouse[1]) + 20)
             .attr("font-family", "sans-serif")
-            .text("+" + value).transition(d3.expOut).duration(750)
+            .text("+" + value).transition(d3.expOut).duration(750 * indice)
             .style('opacity', 0)
             .attr('x', Number(mouse[0]) + 40)
             .attr('y', Number(mouse[1]) + 40)
@@ -185,16 +159,16 @@ function ShootGame(params) {
             });
 
         // Create bubbles
-        for (var i = 0; i < Math.floor(Math.random() * 2000) + 1; i++) {
+        for (var i = 0; i < Math.floor(Math.random() * 1000) +  (indice+1); i++) {
             // Create random numbers for translation of circles
-            var randomNumber = Math.floor((Math.random() < 0.5 ? -1 : 1) * Math.random() * 100);
-            var randomNumber2 = Math.floor((Math.random() < 0.5 ? -1 : 1) * Math.random() * 50);
+            var randomNumber = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 100) * (indice+1));
+            var randomNumber2 = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 50) * (indice+1));
             var color = (Math.floor(Math.random() * 10) % 2 === 0) ? 'black' : 'red';
             // Create circles
             container.append('circle')
                 .attr('cx', mouse[0])
                 .attr('cy', mouse[1])
-                .attr('r', Math.random() * 5)
+                .attr('r', Math.random() * (5 * ((indice/2) + 1)))
                 .attr('fill', color)
                 .attr('opacity', Math.random() * 5)
                 .transition(d3.expOut)
@@ -205,5 +179,15 @@ function ShootGame(params) {
                     d3.select(this).remove()
                 });
         }
+    }
+    /**
+     * return the index of the rings value []
+     * @param {Number} val - ring touched value   
+     */
+    function getIndexFromValue(val){
+        var value = Number(val);
+        return targetParams.findIndex(function(element, i){
+            return (element._value === value)
+        }, this);
     }
 }
