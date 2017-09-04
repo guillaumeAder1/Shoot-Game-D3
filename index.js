@@ -74,14 +74,12 @@ function ShootGame(params) {
     }
 
     function explodeAnim(element) {
-        // Get mouse coordinates
-        //var mouse = coord;
-        console.log(element)
+
         var mouse = [
             element.attr('cx'),
             element.attr('cy')
         ];
-        // Create many bubbles
+        // Create bubbles
         for (var i = 0; i < Math.floor(Math.random() * 2000) + 1; i++) {
             // Create random numbers for translation of circles
             var randomNumber = Math.floor((Math.random() < 0.5 ? -1 : 1) * Math.random() * 100);
@@ -96,8 +94,7 @@ function ShootGame(params) {
                 .attr('opacity', Math.random() * 5)
                 .transition(d3.easeExp)
                 .duration(500)
-                .attr('transform', 'translate(' + randomNumber +
-                    ',' + randomNumber2 + ')')
+                .attr('transform', 'translate(' + randomNumber + ',' + randomNumber2 + ')')
                 .attr('opacity', 0)
                 .on('end', function() {
                     d3.select(this).remove()
