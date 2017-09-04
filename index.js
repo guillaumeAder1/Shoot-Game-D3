@@ -10,6 +10,7 @@ function ShootGame(params) {
     var targetShot = 0;
     var paused = false;
     var targetParams;
+    var fontSize = 12;
 
     this.init = function() {
         _params = params;
@@ -144,13 +145,15 @@ function ShootGame(params) {
             element.attr('cy')
         ];
         // use the indice to multiply effect depending of the accuracy
-        var indice = getIndexFromValue(value);
+        var indice = getIndexFromValue(value) + 1;
       
         container.append('text')
             .attr('x', Number(mouse[0]) + 20)
             .attr('y', Number(mouse[1]) + 20)
             .attr("font-family", "sans-serif")
-            .text("+" + value).transition(d3.expOut).duration(750 * indice)
+            .attr("font-size", (fontSize + indice) + 'px')
+            .attr('font-weight', 100 * indice)
+            .text("+" + value).transition(d3.expOut).duration(750 * (indice))
             .style('opacity', 0)
             .attr('x', Number(mouse[0]) + 40)
             .attr('y', Number(mouse[1]) + 40)
@@ -159,16 +162,16 @@ function ShootGame(params) {
             });
 
         // Create bubbles
-        for (var i = 0; i < Math.floor(Math.random() * 1000) +  (indice+1); i++) {
+        for (var i = 0; i < Math.floor(Math.random() * 1000) +  (indice); i++) {
             // Create random numbers for translation of circles
-            var randomNumber = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 100) * (indice+1));
-            var randomNumber2 = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 50) * (indice+1));
+            var randomNumber = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 100) * (indice));
+            var randomNumber2 = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 50) * (indice));
             var color = (Math.floor(Math.random() * 10) % 2 === 0) ? 'black' : 'red';
             // Create circles
             container.append('circle')
                 .attr('cx', mouse[0])
                 .attr('cy', mouse[1])
-                .attr('r', Math.random() * (5 * ((indice/2) + 1)))
+                .attr('r', Math.random() * (5 * ((indice/2) )))
                 .attr('fill', color)
                 .attr('opacity', Math.random() * 5)
                 .transition(d3.expOut)
