@@ -5,6 +5,9 @@ function ShootGame(params) {
     var container;
     var rootDom;
     var screenSize;
+    var targetCounterDom;
+    var targetCounter = 0;
+    var targetShot = 0;
 
     this.init = function() {
         _params = params;
@@ -13,51 +16,88 @@ function ShootGame(params) {
         container = d3.select('#svg').append('svg')
             .attr('width', '100%')
             .attr('height', '100vh')
-            //.style('background-color', 'gray');
+            .style('background-color', '#e5e5e5');
         rootDom = document.getElementById('svg')
         screenSize = {
             w: rootDom.offsetWidth,
             h: rootDom.offsetHeight
         };
+        document.body.style.cursor = 'crosshair';
 
-        document.body.style.cursor = 'crosshair'
-
+        writeCounter();
         load();
+    }
+
+    function writeCounter() {
+        if (targetCounterDom) {
+            targetCounterDom.remove();
+            targetMissedDom.remove()
+            targetCounter += 1;
+        }
+        targetCounterDom = container.append('text')
+            .attr('x', 10)
+            .attr('y', 20)
+            .attr("font-family", "sans-serif")
+            .text('Total target: ' + targetCounter);
+
+        targetMissedDom = container.append('text')
+            .attr('x', 10)
+            .attr('y', 40)
+            .attr("font-family", "sans-serif")
+            .text('Target missed: ' + (targetCounter - targetShot).toString());
     }
 
     function load() {
         var timer = setInterval(function() {
-            createCircle()
+            createCircle();
+            writeCounter();
         }, _params.displayDelay);
     }
 
+    function randomDest(axis) {
+        if (axis === 'x') {
+            return Math.floor(Math.random() * screenSize.w)
+        } else {
+            return Math.floor(Math.random() * screenSize.h)
+        }
+    }
+
     function createCircle() {
+
         var center = {
-            cx: Math.floor(Math.random() * screenSize.w),
-            cy: Math.floor(Math.random() * screenSize.h)
+            cx: Math.floor(Math.random() * screenSize.w / 2),
+            cy: Math.floor(Math.random() * screenSize.h / 2)
         };
         var group = container.append('g');
-        group.transition()
-            .delay(_params.removeAfter)
-            .remove();
+        // var destination = (_params.isMoving) ? 
+        //.attr('transform', 'translate(' + center.cx + Math.floor(Math.random() * 50) + ',' + center.cy + Math.floor(Math.random() * 50) + ')')
+
+        group.attr('transform', 'translate(' + center.cx + ',' + center.cy + ')')
+            .transition().duration(_params.removeAfter * 5)
+            .attr('transform', 'translate(' + randomDest('x') + ',' + randomDest('y') + ')')
+            .on('end', function() {
+                d3.select(this).remove();
+            })
         var outter = group.append('circle')
             .attr('r', 20)
-            .attr('cx', center.cx)
-            .attr('cy', center.cy)
+            // .attr('cx', center.cx)
+            // .attr('cy', center.cy)
             .style('fill', 'red')
             .on('click', function() {
-                explodeAnim(d3.select(this))
+                var val = 50;
+                explodeAnim(d3.select(this.parentNode), val);
                 destroyTarget(d3.select(this.parentNode));
-                addCounter(50);
+                addCounter(val);
             });
         var inner = group.append('circle')
             .attr('r', 10)
-            .attr('cx', center.cx)
-            .attr('cy', center.cy)
+            // .attr('cx', center.cx)
+            // .attr('cy', center.cy)
             .on('click', function() {
-                explodeAnim(d3.select(this))
+                var val = 100;
+                explodeAnim(d3.select(this.parentNode), val)
                 destroyTarget(d3.select(this.parentNode));
-                addCounter(100);
+                addCounter(val);
             });
     }
 
@@ -69,16 +109,32 @@ function ShootGame(params) {
     }
 
     function addCounter(value) {
+        targetShot += 1;
         counter += value;
         counterDom.innerHTML = counter;
     }
 
-    function explodeAnim(element) {
+    function explodeAnim(element, value) {
+        var transform = element.attr('transform').replace('translate(', '').replace(')', '');
+        var mouse = transform.split(',');
 
-        var mouse = [
-            element.attr('cx'),
-            element.attr('cy')
-        ];
+        // var mouse = [
+        //     element.attr('cx'),
+        //     element.attr('cy')
+        // ];
+
+        container.append('text')
+            .attr('x', Number(mouse[0]) + 20)
+            .attr('y', Number(mouse[1]) + 20)
+            .attr("font-family", "sans-serif")
+            .text("+" + value).transition(d3.expOut).duration(750)
+            .style('opacity', 0)
+            .attr('x', Number(mouse[0]) + 40)
+            .attr('y', Number(mouse[1]) + 40)
+            .on('end', function() {
+                d3.select(this).remove();
+            });
+
         // Create bubbles
         for (var i = 0; i < Math.floor(Math.random() * 2000) + 1; i++) {
             // Create random numbers for translation of circles
@@ -92,7 +148,7 @@ function ShootGame(params) {
                 .attr('r', Math.random() * 5)
                 .attr('fill', color)
                 .attr('opacity', Math.random() * 5)
-                .transition(d3.easeExp)
+                .transition(d3.expOut)
                 .duration(500)
                 .attr('transform', 'translate(' + randomNumber + ',' + randomNumber2 + ')')
                 .attr('opacity', 0)
