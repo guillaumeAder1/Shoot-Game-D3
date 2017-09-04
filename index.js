@@ -56,9 +56,9 @@ function ShootGame(params) {
 
     function randomDest(axis) {
         if (axis === 'x') {
-            return Math.floor(Math.random() * screenSize.w)
+            return Math.floor(Math.random() * screenSize.w / 2)
         } else {
-            return Math.floor(Math.random() * screenSize.h)
+            return Math.floor(Math.random() * screenSize.h / 2)
         }
     }
 
@@ -69,6 +69,10 @@ function ShootGame(params) {
             cy: Math.floor(Math.random() * screenSize.h / 2)
         };
         var group = container.append('g');
+        var dest = {
+            cx: randomDest('x'),
+            cy: randomDest('y')
+        }
 
         group
             .transition().duration(_params.removeAfter * 5)
@@ -76,26 +80,33 @@ function ShootGame(params) {
                 d3.select(this).remove();
             })
         var outter = group.append('circle')
-            .attr('r', 20)
-            .attr('cx', center.cx)
-            .attr('cy', center.cy)
-            .style('fill', 'red')
             .on('click', function() {
                 var val = 50;
                 explodeAnim(d3.select(this), val);
                 destroyTarget(d3.select(this.parentNode));
                 addCounter(val);
-            });
-        var inner = group.append('circle')
-            .attr('r', 10)
+            })
+            .attr('r', 20)
             .attr('cx', center.cx)
             .attr('cy', center.cy)
+            .style('fill', 'red')
+            .transition().duration(3000)
+            .attr('cx', dest.cx)
+            .attr('cy', dest.cy);
+
+        var inner = group.append('circle')
             .on('click', function() {
                 var val = 100;
                 explodeAnim(d3.select(this), val)
                 destroyTarget(d3.select(this.parentNode));
                 addCounter(val);
-            });
+            })
+            .attr('r', 10)
+            .attr('cx', center.cx)
+            .attr('cy', center.cy)
+            .transition().duration(3000)
+            .attr('cx', dest.cx)
+            .attr('cy', dest.cy);
     }
 
     function destroyTarget(element) {
