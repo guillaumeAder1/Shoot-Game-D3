@@ -9,6 +9,7 @@ function ShootGame(params) {
     var targetCounter = 0;
     var targetShot = 0;
     var paused = false;
+    var targetParams;
 
     this.init = function() {
         _params = params;
@@ -29,6 +30,12 @@ function ShootGame(params) {
             if (e.keyCode !== 13) { return; }           
             paused = !paused;
         });
+
+        targetParams = new Array();
+        for(var i = 0 ; i < _params.nbrTargetZone ; i ++){
+            targetParams.push({_value: (i+1) * 25})
+        }
+
         writeCounter();
         load();
     }
@@ -86,34 +93,63 @@ function ShootGame(params) {
             .on('end', function() {
                 d3.select(this).remove();
             })
-        var outter = group.append('circle')
+
+
+        for(var i = _params.nbrTargetZone ; i > 0 ; i --){
+            var value = ((_params.nbrTargetZone - i) + 1) * 25;
+            var ring = group.append('circle')           
+            .attr('_value', value)
             .on('click, mousedown', function() {
-                var val = 50;
+                var val = d3.select(this).attr('_value')
                 explodeAnim(d3.select(this), val);
                 destroyTarget(d3.select(this.parentNode));
-                addCounter(val);
+                addCounter(Number(val));
             })
-            .attr('r', 20)
+            .attr('r', ((i+1) * 25) / _params.targetSizeRatio )
             .attr('cx', center.cx)
             .attr('cy', center.cy)
-            .style('fill', 'red')
-            .transition(d3.expOut).duration(_params.removeAfter)
-            .attr('cx', dest.cx)
-            .attr('cy', dest.cy);
+            .style('fill', function(){
+                return (i % 2 === 0) ? 'black' : 'red';
+            })
 
-        var inner = group.append('circle')
-            .on('click, mousedown', function() {
-                var val = 100;
-                explodeAnim(d3.select(this), val)
-                destroyTarget(d3.select(this.parentNode));
-                addCounter(val);
-            })
-            .attr('r', 10)
-            .attr('cx', center.cx)
-            .attr('cy', center.cy)
-            .transition(d3.expOut).duration(_params.removeAfter)
-            .attr('cx', dest.cx)
-            .attr('cy', dest.cy);
+            if(_params.isMoving){
+                ring.transition(d3.expOut).duration(_params.removeAfter)
+                .attr('cx', dest.cx)
+                .attr('cy', dest.cy);
+            }
+            
+        }
+           
+        
+
+        // var outter = group.append('circle')
+        //     .on('click, mousedown', function() {
+        //         var val = 50;
+        //         explodeAnim(d3.select(this), val);
+        //         destroyTarget(d3.select(this.parentNode));
+        //         addCounter(val);
+        //     })
+        //     .attr('r', 20)
+        //     .attr('cx', center.cx)
+        //     .attr('cy', center.cy)
+        //     .style('fill', 'red')
+        //     .transition(d3.expOut).duration(_params.removeAfter)
+        //     .attr('cx', dest.cx)
+        //     .attr('cy', dest.cy);
+
+        // var inner = group.append('circle')
+        //     .on('click, mousedown', function() {
+        //         var val = 100;
+        //         explodeAnim(d3.select(this), val)
+        //         destroyTarget(d3.select(this.parentNode));
+        //         addCounter(val);
+        //     })
+        //     .attr('r', 10)
+        //     .attr('cx', center.cx)
+        //     .attr('cy', center.cy)
+        //     .transition(d3.expOut).duration(_params.removeAfter)
+        //     .attr('cx', dest.cx)
+        //     .attr('cy', dest.cy);
     }
 
     function destroyTarget(element) {
