@@ -8,6 +8,7 @@ function ShootGame(params) {
     var targetCounterDom;
     var targetCounter = 0;
     var targetShot = 0;
+    var paused = false;
 
     this.init = function() {
         _params = params;
@@ -24,6 +25,10 @@ function ShootGame(params) {
         };
         document.body.style.cursor = 'crosshair';
 
+        document.addEventListener('keyup', function(e) {
+            if (e.keyCode !== 13) { return; }           
+            paused = !paused;
+        });
         writeCounter();
         load();
     }
@@ -49,24 +54,26 @@ function ShootGame(params) {
 
     function load() {
         var timer = setInterval(function() {
-            createCircle();
-            writeCounter();
+            if(!paused){
+                createCircle();
+                writeCounter();
+            }            
         }, _params.displayDelay);
     }
 
     function randomDest(axis) {
         if (axis === 'x') {
-            return Math.floor(Math.random() * screenSize.w / 2)
+            return Math.floor(Math.random() * screenSize.w )
         } else {
-            return Math.floor(Math.random() * screenSize.h / 2)
+            return Math.floor(Math.random() * screenSize.h )
         }
     }
 
     function createCircle() {
 
         var center = {
-            cx: Math.floor(Math.random() * screenSize.w / 2),
-            cy: Math.floor(Math.random() * screenSize.h / 2)
+            cx: Math.floor(Math.random() * screenSize.w ),
+            cy: Math.floor(Math.random() * screenSize.h )
         };
         var group = container.append('g');
         var dest = {
@@ -75,12 +82,12 @@ function ShootGame(params) {
         }
 
         group
-            .transition().duration(_params.removeAfter * 5)
+            .transition().duration(_params.removeAfter)
             .on('end', function() {
                 d3.select(this).remove();
             })
         var outter = group.append('circle')
-            .on('click', function() {
+            .on('click, mousedown', function() {
                 var val = 50;
                 explodeAnim(d3.select(this), val);
                 destroyTarget(d3.select(this.parentNode));
@@ -90,12 +97,12 @@ function ShootGame(params) {
             .attr('cx', center.cx)
             .attr('cy', center.cy)
             .style('fill', 'red')
-            .transition().duration(3000)
+            .transition(d3.expOut).duration(_params.removeAfter)
             .attr('cx', dest.cx)
             .attr('cy', dest.cy);
 
         var inner = group.append('circle')
-            .on('click', function() {
+            .on('click, mousedown', function() {
                 var val = 100;
                 explodeAnim(d3.select(this), val)
                 destroyTarget(d3.select(this.parentNode));
@@ -104,7 +111,7 @@ function ShootGame(params) {
             .attr('r', 10)
             .attr('cx', center.cx)
             .attr('cy', center.cy)
-            .transition().duration(3000)
+            .transition(d3.expOut).duration(_params.removeAfter)
             .attr('cx', dest.cx)
             .attr('cy', dest.cy);
     }
