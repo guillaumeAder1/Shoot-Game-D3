@@ -11,6 +11,7 @@ function ShootGame(params) {
     var paused = false;
     var targetParams;
     var fontSize = 12;
+    var fontWeigthList = [900,800,700,600,500,400,300,200,100];
 
     this.init = function() {
         _params = params;
@@ -40,7 +41,9 @@ function ShootGame(params) {
         writeCounter();
         load();
     }
-
+    /**
+     * refresh ui COUNTER
+     */
     function writeCounter() {
         if (targetCounterDom) {
             targetCounterDom.remove();
@@ -59,7 +62,10 @@ function ShootGame(params) {
             .attr("font-family", "sans-serif")
             .text('Target missed: ' + (targetCounter - targetShot).toString());
     }
-
+    /**
+     * Timer to genereate a new tyraget every ? in millisecond
+     * define in the config {displayDelay}
+     */
     function load() {
         var timer = setInterval(function() {
             if(!paused){
@@ -68,7 +74,10 @@ function ShootGame(params) {
             }            
         }, _params.displayDelay);
     }
-
+    /**
+     * Generate a random detination for the target 
+     * @param {String} axis - coulf 'x' or 'y' 
+     */
     function randomDest(axis) {
         if (axis === 'x') {
             return Math.floor(Math.random() * screenSize.w )
@@ -76,7 +85,11 @@ function ShootGame(params) {
             return Math.floor(Math.random() * screenSize.h )
         }
     }
-
+    /**
+     * Create traget circle vased on config
+     * nbrTargetZone represents the number of ring for the target, 
+     * every ring a different score value
+     */
     function createCircle() {
 
         var center = {
@@ -100,6 +113,7 @@ function ShootGame(params) {
             var ring = group.append('circle')           
             .attr('_value', value)
             .on('click, mousedown', function() {
+                d3.event.preventDefault();
                 var val = d3.select(this).attr('_value')
                 explodeAnim(d3.select(this), val);
                 destroyTarget(d3.select(this.parentNode));
@@ -119,14 +133,19 @@ function ShootGame(params) {
             }            
         }
     }
-
+    /**
+     * remove the target from dom
+     * @param {d3 object} element - the target shot 
+     */
     function destroyTarget(element) {
         element.transition().duration(250)
             .attr('r', 1)
             .style('opacity', 0)
             .remove();
     }
-
+    /*** 
+     * @param {number} value - count the score, depend of the ring's value  
+     */
     function addCounter(value) {
         targetShot += 1;
         counter += value;
@@ -134,7 +153,6 @@ function ShootGame(params) {
     }
 
     /**
-     * 
      * @param {d3 element} element 
      * @param {Number} value - value of the ring touched
      */
@@ -152,7 +170,7 @@ function ShootGame(params) {
             .attr('y', Number(mouse[1]) + 20)
             .attr("font-family", "sans-serif")
             .attr("font-size", (fontSize + indice) + 'px')
-            .attr('font-weight', 100 * indice)
+            .attr('font-weight', getFontWeight(indice))
             .text("+" + value).transition(d3.expOut).duration(750 * (indice))
             .style('opacity', 0)
             .attr('x', Number(mouse[0]) + 40)
@@ -175,7 +193,9 @@ function ShootGame(params) {
                 .attr('fill', color)
                 .attr('opacity', Math.random() * 5)
                 .transition(d3.expOut)
-                .duration(500)
+                .duration(500).delay(function(){
+                    return i * 1;
+                })
                 .attr('transform', 'translate(' + randomNumber + ',' + randomNumber2 + ')')
                 .attr('opacity', 0)
                 .on('end', function() {
@@ -183,6 +203,14 @@ function ShootGame(params) {
                 });
         }
     }
+    /**
+     * if strong, should return 900 and then decrease
+     * @param {Number} indice - multipier for font weight based on indice value
+     */
+    function getFontWeight(indice){
+        return fontWeigthList[targetParams.length - indice];
+    }
+
     /**
      * return the index of the rings value []
      * @param {Number} val - ring touched value   
