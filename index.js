@@ -15,6 +15,7 @@ function ShootGame(params) {
     var timerDom;
     var timerLimit;
     var statsCount = [];
+    var bulletCounter = 0;
 
     this.init = function() {
         _params = params;
@@ -50,9 +51,14 @@ function ShootGame(params) {
     }
 
     function addShotGun() {
-        container.on('click', function() {
+        var event = (_params.gunType === 'single') ? 'click' : 'mousedown';
+
+        container.on(event, function repeat() {
+            bulletCounter += 1;
+            d3.event.preventDefault();
+            console.log("*********", d3.mouse(this));
             var coord = d3.mouse(this);
-            container.append('circle')
+            var bullet = container.append('circle')
                 .attr('r', 15)
                 .attr('cx', screenSize.w / 2)
                 .attr('cy', screenSize.h)
@@ -60,7 +66,11 @@ function ShootGame(params) {
                 .attr('cx', coord[0])
                 .attr('cy', coord[1])
                 .attr('r', 0.5)
-                .style('opacity', 0.5)
+                .style('opacity', 0.5);
+
+            if (_params.gunType === 'auto') {
+                bullet.on('end', repeat);
+            }
         })
     }
     /**
@@ -102,6 +112,10 @@ function ShootGame(params) {
         if (_params.gameTimer) {
             var preMinDom = $('#scorePermin').html("<h3><b>" + Math.floor(counter / _params.gameTimer) + "</b> pts/sec</h3>");
         }
+
+        // bullet counter
+        $('#bulletCount').html("<h3><b>" + bulletCounter + "</b> bullets shot</h3>")
+
 
         // by value hit
         var domStats = $('#reportStats');
@@ -170,14 +184,14 @@ function ShootGame(params) {
         var dest = {
             cx: randomDest('x'),
             cy: randomDest('y')
-        }
-
+        };
+        // remove after limit time expires
         group.transition().duration(_params.removeAfter)
             .on('end', function() {
                 d3.select(this).remove();
-            })
+            });
 
-
+        // create circle base on config number of rings
         for (var i = _params.nbrTargetZone; i > 0; i--) {
             var value = ((_params.nbrTargetZone - i) + 1) * 25;
             var ring = group.append('circle')

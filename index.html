@@ -30,12 +30,13 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Game finished</h4>
+                    <h4 class="modal-title">Game Over</h4>
                 </div>
                 <div class="modal-body">
                     <p>Stats:</p>
                     <div id="scorePermin"></div>
                     <div id="percentage"></div>
+                    <div id="bulletCount"></div>
                     <div id='reportStats'>
                     </div>
                 </div>
@@ -60,7 +61,8 @@
             isMoving: true, // target moves or not
             nbrTargetZone: 5, // number of rings in the target ==> max should be 9 to match with font weight multiplier 
             targetSizeRatio: 6, // lower target size ( 1 => bigger, 6 = smaller and so on)
-            gameTimer: 20 // could be false or Number, number = second, false, no timer 
+            gameTimer: 20, // could be false or Number, number = second, false, no timer 
+            gunType: 'auto' // define fire rate mode: 'single' - 'auto' ...maybe 'bomb'
         }).init();
     </script>
 
