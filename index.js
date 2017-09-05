@@ -12,6 +12,9 @@ function ShootGame(params) {
     var targetParams;
     var fontSize = 12;
     var fontWeigthList = [900,800,700,600,500,400,300,200,100];
+    var timerDom;
+    var timerLimit;
+    var statsCount = [];
 
     this.init = function() {
         _params = params;
@@ -35,12 +38,56 @@ function ShootGame(params) {
 
         targetParams = new Array();
         for(var i = 0 ; i < _params.nbrTargetZone ; i ++){
-            targetParams.push({_value: (i+1) * 25})
+            targetParams.push({_value: (i+1) * 25});
+            statsCount.push({val:(i+1) * 25, hit:0})
         }
-
+        if(_params.gameTimer){
+            createTimer(_params.gameTimer);
+        }
         writeCounter();
         load();
     }
+    /**
+     * timer to finish the game
+     * @param {Number} value - number in second
+     */
+    function createTimer(value){
+        timerLimit = value * 1000;
+        timerDom = container.append('text')
+            .attr('x', 10)
+            .attr('y', 60)
+            .attr("font-family", "sans-serif")
+            .attr('class', 'timeLeft')
+            .text('Time left: ' + value);
+        var timerValueDom = document.querySelector('.timeLeft');
+        var timeTimer = setInterval(function(){
+            value = value - 1
+            timerValueDom.innerHTML = 'Time left: ' + value;
+            if(value === 0){
+                clearInterval(timeTimer);
+                paused = true;
+                $("#myModal").modal();
+                displayStats();
+            }
+        },1000);
+    }
+    /**
+     * get stats player from game finished
+     */
+    function displayStats(){
+        console.log(statsCount)
+
+        var v = targetCounter / targetShot;
+        var res = 100 / v;
+        var domStats = $('#reportStats');
+        var percDom = $('#percentage').html("<h3>" + res + "% hit</h3>");
+        
+        statsCount.forEach(function(element){
+            domStats.append("<div class'row'><span class='stat-cat'>" + element.val + "</span>: <span class='stat-val'>" + element.hit + "</span></div>")
+        },this);
+        
+    }
+
     /**
      * refresh ui COUNTER
      */
@@ -115,6 +162,7 @@ function ShootGame(params) {
             .on('click, mousedown', function() {
                 d3.event.preventDefault();
                 var val = d3.select(this).attr('_value')
+                countStats(val);                               
                 explodeAnim(d3.select(this), val);
                 destroyTarget(d3.select(this.parentNode));
                 addCounter(Number(val));
@@ -132,6 +180,14 @@ function ShootGame(params) {
                 .attr('cy', dest.cy);
             }            
         }
+    }
+
+    function countStats(val){
+        statsCount.forEach(function(element){
+            if (element.val === Number(val)){
+                element.hit += 1;
+            }
+        },this);
     }
     /**
      * remove the target from dom
