@@ -11,7 +11,7 @@ function ShootGame(params) {
     var paused = false;
     var targetParams;
     var fontSize = 12;
-    var fontWeigthList = [900,800,700,600,500,400,300,200,100];
+    var fontWeigthList = [900, 800, 700, 600, 500, 400, 300, 200, 100];
     var timerDom;
     var timerLimit;
     var statsCount = [];
@@ -32,26 +32,42 @@ function ShootGame(params) {
         document.body.style.cursor = 'crosshair';
 
         document.addEventListener('keyup', function(e) {
-            if (e.keyCode !== 13) { return; }           
+            if (e.keyCode !== 13) { return; }
             paused = !paused;
         });
 
         targetParams = new Array();
-        for(var i = 0 ; i < _params.nbrTargetZone ; i ++){
-            targetParams.push({_value: (i+1) * 25});
-            statsCount.push({val:(i+1) * 25, hit:0})
+        for (var i = 0; i < _params.nbrTargetZone; i++) {
+            targetParams.push({ _value: (i + 1) * 25 });
+            statsCount.push({ val: (i + 1) * 25, hit: 0 })
         }
-        if(_params.gameTimer){
+        if (_params.gameTimer) {
             createTimer(_params.gameTimer);
         }
         writeCounter();
+        addShotGun();
         load();
+    }
+
+    function addShotGun() {
+        container.on('click', function() {
+            var coord = d3.mouse(this);
+            container.append('circle')
+                .attr('r', 15)
+                .attr('cx', screenSize.w / 2)
+                .attr('cy', screenSize.h)
+                .transition()
+                .attr('cx', coord[0])
+                .attr('cy', coord[1])
+                .attr('r', 0.5)
+                .style('opacity', 0.5)
+        })
     }
     /**
      * timer to finish the game
      * @param {Number} value - number in second
      */
-    function createTimer(value){
+    function createTimer(value) {
         timerLimit = value * 1000;
         timerDom = container.append('text')
             .attr('x', 10)
@@ -60,10 +76,10 @@ function ShootGame(params) {
             .attr('class', 'timeLeft')
             .text('Time left: ' + value);
         var timerValueDom = document.querySelector('.timeLeft');
-        var timeTimer = setInterval(function(){
+        var timeTimer = setInterval(function() {
             value = value - 1
             timerValueDom.innerHTML = 'Time left: ' + value;
-            if(value === 0){
+            if (value === 0) {
                 clearInterval(timeTimer);
                 paused = true;
                 $("#myModal").modal({
@@ -72,28 +88,28 @@ function ShootGame(params) {
                 });
                 displayStats();
             }
-        },1000);
+        }, 1000);
     }
     /**
      * get stats player from game finished
      */
-    function displayStats(){
+    function displayStats() {
         // percentage hit
         var v = targetCounter / targetShot;
         var res = 100 / v;
         var percDom = $('#percentage').html("<h3><b>" + Math.floor(res) + "</b>% hit</h3>");
 
         // per seconde // need to to another hidden timer to calculate when no game limite
-        if(_params.gameTimer){
+        if (_params.gameTimer) {
             var preMinDom = $('#scorePermin').html("<h3><b>" + Math.floor(counter / _params.gameTimer) + "</b> pts/sec</h3>");
-        }       
+        }
 
         // by value hit
-        var domStats = $('#reportStats');        
-        statsCount.forEach(function(element){
+        var domStats = $('#reportStats');
+        statsCount.forEach(function(element) {
             domStats.append("<div class'row'><span class='stat-cat'>" + element.val + "</span>: <span class='stat-val'>" + element.hit + "</span></div>")
-        },this);
-        
+        }, this);
+
     }
 
     /**
@@ -123,10 +139,10 @@ function ShootGame(params) {
      */
     function load() {
         var timer = setInterval(function() {
-            if(!paused){
+            if (!paused) {
                 createCircle();
                 writeCounter();
-            }            
+            }
         }, _params.displayDelay);
     }
     /**
@@ -135,9 +151,9 @@ function ShootGame(params) {
      */
     function randomDest(axis) {
         if (axis === 'x') {
-            return Math.floor(Math.random() * screenSize.w )
+            return Math.floor(Math.random() * screenSize.w)
         } else {
-            return Math.floor(Math.random() * screenSize.h )
+            return Math.floor(Math.random() * screenSize.h)
         }
     }
     /**
@@ -148,8 +164,8 @@ function ShootGame(params) {
     function createCircle() {
 
         var center = {
-            cx: Math.floor(Math.random() * screenSize.w ),
-            cy: Math.floor(Math.random() * screenSize.h )
+            cx: Math.floor(Math.random() * screenSize.w),
+            cy: Math.floor(Math.random() * screenSize.h)
         };
         var group = container.append('g');
         var dest = {
@@ -163,39 +179,39 @@ function ShootGame(params) {
             })
 
 
-        for(var i = _params.nbrTargetZone ; i > 0 ; i --){
+        for (var i = _params.nbrTargetZone; i > 0; i--) {
             var value = ((_params.nbrTargetZone - i) + 1) * 25;
-            var ring = group.append('circle')           
-            .attr('_value', value)
-            .on('click, mousedown', function() {
-                d3.event.preventDefault();
-                var val = d3.select(this).attr('_value')
-                countStats(val);                               
-                explodeAnim(d3.select(this), val);
-                destroyTarget(d3.select(this.parentNode));
-                addCounter(Number(val));
-            })
-            .attr('r', ((i+1) * 25) / _params.targetSizeRatio )
-            .attr('cx', center.cx)
-            .attr('cy', center.cy)
-            .style('fill', function(){
-                return (i % 2 === 0) ? 'black' : 'red';
-            })
+            var ring = group.append('circle')
+                .attr('_value', value)
+                .on('click, mousedown', function() {
+                    d3.event.preventDefault();
+                    var val = d3.select(this).attr('_value')
+                    countStats(val);
+                    explodeAnim(d3.select(this), val);
+                    destroyTarget(d3.select(this.parentNode));
+                    addCounter(Number(val));
+                })
+                .attr('r', ((i + 1) * 25) / _params.targetSizeRatio)
+                .attr('cx', center.cx)
+                .attr('cy', center.cy)
+                .style('fill', function() {
+                    return (i % 2 === 0) ? 'black' : 'red';
+                })
 
-            if(_params.isMoving){
+            if (_params.isMoving) {
                 ring.transition(d3.expOut).duration(_params.removeAfter)
-                .attr('cx', dest.cx)
-                .attr('cy', dest.cy);
-            }            
+                    .attr('cx', dest.cx)
+                    .attr('cy', dest.cy);
+            }
         }
     }
 
-    function countStats(val){
-        statsCount.forEach(function(element){
-            if (element.val === Number(val)){
+    function countStats(val) {
+        statsCount.forEach(function(element) {
+            if (element.val === Number(val)) {
                 element.hit += 1;
             }
-        },this);
+        }, this);
     }
     /**
      * remove the target from dom
@@ -228,7 +244,7 @@ function ShootGame(params) {
         ];
         // use the indice to multiply effect depending of the accuracy
         var indice = getIndexFromValue(value) + 1;
-      
+
         container.append('text')
             .attr('x', Number(mouse[0]) + 20)
             .attr('y', Number(mouse[1]) + 20)
@@ -244,7 +260,7 @@ function ShootGame(params) {
             });
 
         // Create bubbles
-        for (var i = 0; i < Math.floor(Math.random() * 1000) +  (indice); i++) {
+        for (var i = 0; i < Math.floor(Math.random() * 1000) + (indice); i++) {
             // Create random numbers for translation of circles
             var randomNumber = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 100) * (indice));
             var randomNumber2 = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 50) * (indice));
@@ -253,11 +269,11 @@ function ShootGame(params) {
             container.append('circle')
                 .attr('cx', mouse[0])
                 .attr('cy', mouse[1])
-                .attr('r', Math.random() * (5 * ((indice/2) )))
+                .attr('r', Math.random() * (5 * ((indice / 2))))
                 .attr('fill', color)
                 .attr('opacity', Math.random() * 5)
                 .transition(d3.expOut)
-                .duration(500).delay(function(){
+                .duration(500).delay(function() {
                     return i * 1;
                 })
                 .attr('transform', 'translate(' + randomNumber + ',' + randomNumber2 + ')')
@@ -271,7 +287,7 @@ function ShootGame(params) {
      * if strong, should return 900 and then decrease
      * @param {Number} indice - multipier for font weight based on indice value
      */
-    function getFontWeight(indice){
+    function getFontWeight(indice) {
         return fontWeigthList[targetParams.length - indice];
     }
 
@@ -279,9 +295,9 @@ function ShootGame(params) {
      * return the index of the rings value []
      * @param {Number} val - ring touched value   
      */
-    function getIndexFromValue(val){
+    function getIndexFromValue(val) {
         var value = Number(val);
-        return targetParams.findIndex(function(element, i){
+        return targetParams.findIndex(function(element, i) {
             return (element._value === value)
         }, this);
     }
