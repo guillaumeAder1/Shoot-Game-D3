@@ -72,7 +72,7 @@ function ShootGame(params) {
                 .transition().delay(function(d,i){ return i * 2})
                 .attr('cx', function(d){return d.destination.x})
                 .attr('cy', function(d){return d.destination.y})
-                .attr('r', 3)
+                .attr('r', function(d){return d.r / 2})
                 .style('opacity', 0.5)
                 .on('end', function(){
                     d3.select(this).remove();
