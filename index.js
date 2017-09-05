@@ -46,33 +46,90 @@ function ShootGame(params) {
             createTimer(_params.gameTimer);
         }
         writeCounter();
-        addShotGun();
+        addGun();
         load();
     }
 
-    function addShotGun() {
-        var event = (_params.gunType === 'single') ? 'click' : 'mousedown';
+    function addGun() {
+        // var _event = (_params.gunType === 'single') ? 'click' : 'mousedown';
+        var _event = 'mousedown';
 
-        container.on(event, function repeat() {
+        container.on(_event, function repeat(e) {
             bulletCounter += 1;
             d3.event.preventDefault();
-            console.log("*********", d3.mouse(this));
             var coord = d3.mouse(this);
-            var bullet = container.append('circle')
-                .attr('r', 15)
-                .attr('cx', screenSize.w / 2)
-                .attr('cy', screenSize.h)
-                .transition()
-                .attr('cx', coord[0])
-                .attr('cy', coord[1])
-                .attr('r', 0.5)
-                .style('opacity', 0.5);
 
-            if (_params.gunType === 'auto') {
-                bullet.on('end', repeat);
-            }
+            var bullets = createBullet(_params.gunType, coord);
+
+            
+            var bullet = container.selectAll('circle[class="bullet"]').data(bullets).enter()
+            console.log(bullet)
+            bullet.append('circle')
+                .attr('class', 'bullet')
+                .attr('r', function(d){return d.r})
+                .attr('cx', function(d){return d.origin.x})
+                .attr('cy', function(d){return d.origin.y})
+                .transition().delay(function(d,i){ return i * 2})
+                .attr('cx', function(d){return d.destination.x})
+                .attr('cy', function(d){return d.destination.y})
+                .attr('r', 3)
+                .style('opacity', 0.5)
+                .on('end', function(){
+                    d3.select(this).remove();
+                    //repeat().bind(container);
+                });
+
+            // if (_params.gunType === 'auto') {
+            //     bullet.on('end', repeat);
+            // }
         })
     }
+
+    /**
+     * create Data object for bullet, one of more bullet depends of type
+     * can alter the precision as well
+     * @param {String} type - auto / shotgun / single [gunType from config]
+     * @param {array} coord - coor destination
+     */
+    function createBullet(type, coord){
+        var _d = [];
+        if(type === 'shotgun'){
+            for (var i = 0 ; i < 6 ; i ++){
+                var randX = Math.floor(Math.random() * 15);
+                var randY = Math.floor(Math.random() * 20);
+                var randSign = (Math.floor(Math.random() * 10) % 2 === 0 ) ? true : false;
+                randX = (randSign) ? randX : - randX ;
+                randY = (randSign) ? randY : - randY ;
+                _d.push({
+                    origin: {
+                        x:screenSize.w / 2,
+                        y:screenSize.h
+                    },
+                    destination: {
+                        x:coord[0] + randX,
+                        y:coord[1] + randY
+                    },
+                    r: Math.floor(Math.random() * 7)
+                })
+            }
+        } else {
+            // single bullet
+            _d.push({
+                    origin: {
+                        x:screenSize.w / 2,
+                        y:screenSize.h
+                    },
+                    destination: {
+                        x:coord[0],
+                        y:coord[1]
+                    },
+                    r:15
+                });
+           
+        }
+        return _d;
+    }
+
     /**
      * timer to finish the game
      * @param {Number} value - number in second
@@ -177,8 +234,8 @@ function ShootGame(params) {
     function createCircle() {
 
         var center = {
-            cx: Math.floor(Math.random() * screenSize.w),
-            cy: Math.floor(Math.random() * screenSize.h)
+            cx: randomDest('x'),
+            cy: randomDest('y')
         };
         var group = container.append('g');
         var dest = {
@@ -216,7 +273,7 @@ function ShootGame(params) {
                 })
 
             if (_params.isMoving) {
-                ring.transition(d3.expOut).duration(_params.removeAfter)
+                ring.transition(d3.easeCubicOut(.5)).duration(_params.removeAfter)
                     .attr('cx', dest.cx)
                     .attr('cy', dest.cy);
             }
