@@ -78,13 +78,18 @@ function ShootGame(params) {
      * get stats player from game finished
      */
     function displayStats(){
-        console.log(statsCount)
-
+        // percentage hit
         var v = targetCounter / targetShot;
         var res = 100 / v;
-        var domStats = $('#reportStats');
-        var percDom = $('#percentage').html("<h3>" + Math.floor(res) + "% hit</h3>");
-        
+        var percDom = $('#percentage').html("<h3><b>" + Math.floor(res) + "</b>% hit</h3>");
+
+        // per seconde // need to to another hidden timer to calculate when no game limite
+        if(_params.gameTimer){
+            var preMinDom = $('#scorePermin').html("<h3><b>" + Math.floor(counter / _params.gameTimer) + "</b> pts/sec</h3>");
+        }       
+
+        // by value hit
+        var domStats = $('#reportStats');        
         statsCount.forEach(function(element){
             domStats.append("<div class'row'><span class='stat-cat'>" + element.val + "</span>: <span class='stat-val'>" + element.hit + "</span></div>")
         },this);
