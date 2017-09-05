@@ -68,7 +68,6 @@ function ShootGame(params) {
      * @param {Number} value - number in second
      */
     function createTimer(value) {
-        timerLimit = value * 1000;
         timerDom = container.append('text')
             .attr('x', 10)
             .attr('y', 60)
@@ -159,7 +158,7 @@ function ShootGame(params) {
     /**
      * Create traget circle vased on config
      * nbrTargetZone represents the number of ring for the target, 
-     * every ring a different score value
+     * every ring has a different score value
      */
     function createCircle() {
 
@@ -187,9 +186,11 @@ function ShootGame(params) {
                     d3.event.preventDefault();
                     var val = d3.select(this).attr('_value')
                     countStats(val);
-                    explodeAnim(d3.select(this), val);
-                    destroyTarget(d3.select(this.parentNode));
-                    addCounter(Number(val));
+                    setTimeout(function() {
+                        explodeAnim(d3.select(this), val);
+                        destroyTarget(d3.select(this.parentNode));
+                        addCounter(Number(val));
+                    }, 100);
                 })
                 .attr('r', ((i + 1) * 25) / _params.targetSizeRatio)
                 .attr('cx', center.cx)
