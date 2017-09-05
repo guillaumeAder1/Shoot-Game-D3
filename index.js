@@ -66,7 +66,10 @@ function ShootGame(params) {
             if(value === 0){
                 clearInterval(timeTimer);
                 paused = true;
-                $("#myModal").modal();
+                $("#myModal").modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
                 displayStats();
             }
         },1000);
@@ -80,7 +83,7 @@ function ShootGame(params) {
         var v = targetCounter / targetShot;
         var res = 100 / v;
         var domStats = $('#reportStats');
-        var percDom = $('#percentage').html("<h3>" + res + "% hit</h3>");
+        var percDom = $('#percentage').html("<h3>" + Math.floor(res) + "% hit</h3>");
         
         statsCount.forEach(function(element){
             domStats.append("<div class'row'><span class='stat-cat'>" + element.val + "</span>: <span class='stat-val'>" + element.hit + "</span></div>")
