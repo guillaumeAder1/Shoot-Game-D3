@@ -289,7 +289,7 @@ function ShootGame(params) {
                 .attr('r', Math.random() * (5 * ((indice / 2))))
                 .attr('fill', color)
                 .attr('opacity', Math.random() * 5)
-                .transition(d3.expOut)
+                .transition(d3.easeCubicOut())
                 .duration(500).delay(function() {
                     return i * 1;
                 })
