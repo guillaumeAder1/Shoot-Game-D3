@@ -185,10 +185,12 @@ function ShootGame(params) {
                 .on('click, mousedown', function() {
                     d3.event.preventDefault();
                     var val = d3.select(this).attr('_value')
+                    var _this = d3.select(this);
+                    var _parent = d3.select(this.parentNode)
                     countStats(val);
                     setTimeout(function() {
-                        explodeAnim(d3.select(this), val);
-                        destroyTarget(d3.select(this.parentNode));
+                        explodeAnim(_this, val);
+                        destroyTarget(_parent);
                         addCounter(Number(val));
                     }, 100);
                 })
