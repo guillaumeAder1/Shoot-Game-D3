@@ -16,6 +16,22 @@ function ShootGame(params) {
     var timerLimit;
     var statsCount = [];
     var bulletCounter = 0;
+    var bulletsCoordinate = [];
+    var targetBBSize;
+
+    /**
+     * test var visibitly
+     */
+    this.test = 'toto'
+    this.fcTest = function(val) {
+        console.log(this, val, this.test, fontWeigthList)
+        testFc()
+    }
+    this.fcTest('okok');
+
+    function testFc() {
+        console.log('function test', fontWeigthList, this.test)
+    }
 
     this.init = function() {
         _params = params;
@@ -61,20 +77,20 @@ function ShootGame(params) {
 
             var bullets = createBullet(_params.gunType, coord);
 
-            
+
             var bullet = container.selectAll('circle[class="bullet"]').data(bullets).enter()
             console.log(bullet)
             bullet.append('circle')
                 .attr('class', 'bullet')
-                .attr('r', function(d){return d.r})
-                .attr('cx', function(d){return d.origin.x})
-                .attr('cy', function(d){return d.origin.y})
-                .transition().delay(function(d,i){ return i * 2})
-                .attr('cx', function(d){return d.destination.x})
-                .attr('cy', function(d){return d.destination.y})
-                .attr('r', function(d){return d.r / 2})
+                .attr('r', function(d) { return d.r })
+                .attr('cx', function(d) { return d.origin.x })
+                .attr('cy', function(d) { return d.origin.y })
+                .transition().delay(function(d, i) { return i * 2 })
+                .attr('cx', function(d) { return d.destination.x })
+                .attr('cy', function(d) { return d.destination.y })
+                .attr('r', function(d) { return d.r / 2 })
                 .style('opacity', 0.5)
-                .on('end', function(){
+                .on('end', function() {
                     d3.select(this).remove();
                     //repeat().bind(container);
                 });
@@ -91,23 +107,23 @@ function ShootGame(params) {
      * @param {String} type - auto / shotgun / single [gunType from config]
      * @param {array} coord - coor destination
      */
-    function createBullet(type, coord){
+    function createBullet(type, coord) {
         var _d = [];
-        if(type === 'shotgun'){
-            for (var i = 0 ; i < 6 ; i ++){
+        if (type === 'shotgun') {
+            for (var i = 0; i < 6; i++) {
                 var randX = Math.floor(Math.random() * 15);
                 var randY = Math.floor(Math.random() * 20);
-                var randSign = (Math.floor(Math.random() * 10) % 2 === 0 ) ? true : false;
-                randX = (randSign) ? randX : - randX ;
-                randY = (randSign) ? randY : - randY ;
+                var randSign = (Math.floor(Math.random() * 10) % 2 === 0) ? true : false;
+                randX = (randSign) ? randX : -randX;
+                randY = (randSign) ? randY : -randY;
                 _d.push({
                     origin: {
-                        x:screenSize.w / 2,
-                        y:screenSize.h
+                        x: screenSize.w / 2,
+                        y: screenSize.h
                     },
                     destination: {
-                        x:coord[0] + randX,
-                        y:coord[1] + randY
+                        x: coord[0] + randX,
+                        y: coord[1] + randY
                     },
                     r: Math.floor(Math.random() * 7)
                 })
@@ -115,17 +131,17 @@ function ShootGame(params) {
         } else {
             // single bullet
             _d.push({
-                    origin: {
-                        x:screenSize.w / 2,
-                        y:screenSize.h
-                    },
-                    destination: {
-                        x:coord[0],
-                        y:coord[1]
-                    },
-                    r:15
-                });
-           
+                origin: {
+                    x: screenSize.w / 2,
+                    y: screenSize.h
+                },
+                destination: {
+                    x: coord[0],
+                    y: coord[1]
+                },
+                r: 15
+            });
+
         }
         return _d;
     }
@@ -172,6 +188,23 @@ function ShootGame(params) {
 
         // bullet counter
         $('#bulletCount').html("<h3><b>" + bulletCounter + "</b> bullets shot</h3>")
+
+        var _w = targetBBSize.w * 2;
+        var _h = targetBBSize.h * 2;
+        var target = d3.select('#targetVizu').append('svg')
+            .attr('width', _w + 'px')
+            .attr('height', _h + 'px')
+        target.append('circle')
+            .attr('r', _w / 2)
+            .attr('cx', _w / 2)
+            .attr('cy', _h / 2)
+            .style('fill', 'lightgreen')
+        target.selectAll('circle[class="marker"]').data(bulletsCoordinate).enter()
+            .append('circle')
+            .attr('class', 'marker')
+            .attr('r', 3)
+            .attr('cx', function(d, i) { return Math.floor(d.x) * 2 })
+            .attr('cy', function(d, i) { return Math.floor(d.y) * 2 })
 
 
         // by value hit
@@ -258,6 +291,7 @@ function ShootGame(params) {
                     var val = d3.select(this).attr('_value')
                     var _this = d3.select(this);
                     var _parent = d3.select(this.parentNode)
+                    saveShootCoordinates(d3.mouse(this), _parent.node().getBBox())
                     countStats(val);
                     setTimeout(function() {
                         explodeAnim(_this, val);
@@ -278,6 +312,21 @@ function ShootGame(params) {
                     .attr('cy', dest.cy);
             }
         }
+    }
+
+    function saveShootCoordinates(mouse, bbox) {
+        console.log(mouse, bbox);
+
+        bulletsCoordinate.push({
+            x: mouse[0] - bbox.x,
+            y: mouse[1] - bbox.y,
+            bbox: [bbox.width, bbox.height]
+        });
+        targetBBSize = {
+            w: bbox.width,
+            h: bbox.height
+        }
+
     }
 
     function countStats(val) {

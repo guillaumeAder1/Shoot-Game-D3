@@ -37,6 +37,7 @@
                     <div id="scorePermin"></div>
                     <div id="percentage"></div>
                     <div id="bulletCount"></div>
+                    <div id='targetVizu'></div>
                     <div id='reportStats'></div>
                 </div>
                 <div class="modal-footer">
@@ -60,9 +61,12 @@
             isMoving: true, // target moves or not
             nbrTargetZone: 5, // number of rings in the target ==> max should be 9 to match with font weight multiplier 
             targetSizeRatio: 6, // lower target size ( 1 => bigger, 6 = smaller and so on)
-            gameTimer: 20, // could be false or Number, number = second, false, no timer 
+            gameTimer: 10, // could be false or Number, number = second, false, no timer 
             gunType: 'shotgun' // define fire rate mode: 'single' - 'auto' - 'shotgun' ...maybe 'bomb'
-        }).init();
+        })
+        t.init();
+
+        console.log(t)
     </script>
 
 </body>
