@@ -18,6 +18,8 @@ function ShootGame(params) {
     var bulletCounter = 0;
     var bulletsCoordinate = [];
     var targetBBSize;
+    var defValue = 25;
+    var originScore;
 
     /**
      * test var visibitly
@@ -35,8 +37,22 @@ function ShootGame(params) {
 
     this.init = function() {
         _params = params;
+        createDomElements();       
+        createData();             
+        if (_params.gameTimer) {
+            createTimer(_params.gameTimer);
+        }
+        writeCounter();
+        addGun();
+        load();
+    }
+    /**
+     * initialize all dom element
+     */
+    function createDomElements(){
         counter = 0;
         counterDom = document.querySelector('#counter');
+        // create svg
         container = d3.select('#svg').append('svg')
             .attr('width', '100%')
             .attr('height', '100vh')
@@ -46,40 +62,36 @@ function ShootGame(params) {
             w: rootDom.offsetWidth,
             h: rootDom.offsetHeight
         };
+        // change cursor
         document.body.style.cursor = 'crosshair';
-
+        // listener for pause event
         document.addEventListener('keyup', function(e) {
             if (e.keyCode !== 13) { return; }
             paused = !paused;
         });
-
-        targetParams = new Array();
-        for (var i = 0; i < _params.nbrTargetZone; i++) {
-            targetParams.push({ _value: (i + 1) * 25 });
-            statsCount.push({ val: (i + 1) * 25, hit: 0 })
-        }
-        if (_params.gameTimer) {
-            createTimer(_params.gameTimer);
-        }
-        writeCounter();
-        addGun();
-        load();
+    }
+    /**
+     * create array to list score object and data
+     */
+    function createData(){
+        targetParams = new Array(_params.nbrTargetZone).fill();
+        targetParams.forEach(function(element,index,arr){
+            var cur = (index === 0) ? ((arr.length - index) * defValue) + defValue : (arr.length - index) * defValue;                 
+            targetParams[index] = {_value:  cur};
+            statsCount.push({ val: cur, hit: 0 })
+        },this)
+        targetParams.reverse();
     }
 
     function addGun() {
         // var _event = (_params.gunType === 'single') ? 'click' : 'mousedown';
         var _event = 'mousedown';
-
         container.on(_event, function repeat(e) {
             bulletCounter += 1;
             d3.event.preventDefault();
             var coord = d3.mouse(this);
-
             var bullets = createBullet(_params.gunType, coord);
-
-
             var bullet = container.selectAll('circle[class="bullet"]').data(bullets).enter()
-            console.log(bullet)
             bullet.append('circle')
                 .attr('class', 'bullet')
                 .attr('r', function(d) { return d.r })
@@ -139,7 +151,7 @@ function ShootGame(params) {
                     x: coord[0],
                     y: coord[1]
                 },
-                r: 15
+                r: 10
             });
 
         }
@@ -189,22 +201,31 @@ function ShootGame(params) {
         // bullet counter
         $('#bulletCount').html("<h3><b>" + bulletCounter + "</b> bullets shot</h3>")
 
-        var _w = targetBBSize.w * 2;
-        var _h = targetBBSize.h * 2;
-        var target = d3.select('#targetVizu').append('svg')
-            .attr('width', _w + 'px')
-            .attr('height', _h + 'px')
-        target.append('circle')
-            .attr('r', _w / 2)
-            .attr('cx', _w / 2)
-            .attr('cy', _h / 2)
-            .style('fill', 'lightgreen')
-        target.selectAll('circle[class="marker"]').data(bulletsCoordinate).enter()
-            .append('circle')
-            .attr('class', 'marker')
-            .attr('r', 3)
-            .attr('cx', function(d, i) { return Math.floor(d.x) * 2 })
-            .attr('cy', function(d, i) { return Math.floor(d.y) * 2 })
+        // target vizu
+        
+            var _w = targetBBSize.w * 2;
+            var _h = targetBBSize.h * 2;
+            var target = d3.select('#targetVizu').append('svg')
+                .attr('width', _w + 'px')
+                .attr('height', _h + 'px')
+            target.append('circle')
+                .attr('r', _w / 2)
+                .attr('cx', _w / 2)
+                .attr('cy', _h / 2)
+                .style('fill', 'lightgreen')
+                .transition();
+        setTimeout(function(){
+            target.selectAll('circle[class="marker"]').data(bulletsCoordinate).enter()
+                .append('circle')
+                .attr('class', 'marker')
+                .attr('r', 3)
+                .attr('cx', function(d, i) { return Math.floor(d.x) * 2 })
+                .attr('cy', -100)
+                .transition().delay(function(d,i){ return i * 70 })            
+                .attr('cx', function(d, i) { return Math.floor(d.x) * 2 })
+                .attr('cy', function(d, i) { return Math.floor(d.y) * 2 })
+        }, 500)
+        
 
 
         // by value hit
@@ -237,7 +258,7 @@ function ShootGame(params) {
             .text('Target missed: ' + (targetCounter - targetShot).toString());
     }
     /**
-     * Timer to genereate a new tyraget every ? in millisecond
+     * Timer to genereate a new target every ? in millisecond
      * define in the config {displayDelay}
      */
     function load() {
@@ -359,7 +380,6 @@ function ShootGame(params) {
     function createDataTarget(nbrRings) {
         var _d = new Array(nbrRings).fill();
         var def = 25; // default circle value radius
-
         var _origin = {
             cx: randomDest('x'),
             cy: randomDest('y')
@@ -380,18 +400,17 @@ function ShootGame(params) {
     }
 
     function saveShootCoordinates(mouse, bbox) {
-        console.log(mouse, bbox);
-
         bulletsCoordinate.push({
             x: mouse[0] - bbox.x,
             y: mouse[1] - bbox.y,
             bbox: [bbox.width, bbox.height]
         });
-        targetBBSize = {
-            w: bbox.width,
-            h: bbox.height
-        }
-
+        if(!targetBBSize){
+            targetBBSize = {
+                w: bbox.width,
+                h: bbox.height
+            }
+        }        
     }
 
     function countStats(val) {
@@ -425,7 +444,6 @@ function ShootGame(params) {
      * @param {Number} value - value of the ring touched
      */
     function explodeAnim(element, value) {
-
         var mouse = [
             element.attr('cx'),
             element.attr('cy')
@@ -433,21 +451,9 @@ function ShootGame(params) {
         // use the indice to multiply effect depending of the accuracy
         var indice = getIndexFromValue(value) + 1;
 
-        container.append('text')
-            .attr('x', Number(mouse[0]) + 20)
-            .attr('y', Number(mouse[1]) + 20)
-            .attr("font-family", "sans-serif")
-            .attr("font-size", (fontSize + indice) + 'px')
-            .attr('font-weight', getFontWeight(indice))
-            .text("+" + value).transition(d3.expOut).duration(750 * (indice))
-            .style('opacity', 0)
-            .attr('x', Number(mouse[0]) + 40)
-            .attr('y', Number(mouse[1]) + 40)
-            .on('end', function() {
-                d3.select(this).remove();
-            });
+        displayScoreHit(mouse, indice, value);
 
-        // Create bubbles
+        // Create random destination bubbles
         for (var i = 0; i < Math.floor(Math.random() * 1000) + (indice); i++) {
             // Create random numbers for translation of circles
             var randomNumber = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 100) * (indice));
@@ -461,15 +467,34 @@ function ShootGame(params) {
                 .attr('fill', color)
                 .attr('opacity', Math.random() * 5)
                 .transition(d3.easeCubicOut())
-                .duration(500).delay(function() {
-                    return i * 1;
-                })
+                .duration(500).delay(function() { return i * 1;})
                 .attr('transform', 'translate(' + randomNumber + ',' + randomNumber2 + ')')
                 .attr('opacity', 0)
                 .on('end', function() {
                     d3.select(this).remove()
                 });
         }
+    }
+    /**
+     * Score hit marker
+     * @param {array} mouse - mouse coord
+     * @param {int} indice - multiplier
+     * @param {value} value - score number
+     */
+    function displayScoreHit(mouse, indice, value){
+        container.append('text')
+            .attr('x', Number(mouse[0]) + 20)
+            .attr('y', Number(mouse[1]) + 20)
+            .attr("font-family", "sans-serif")
+            .attr("font-size", (fontSize + indice) + 'px')
+            .attr('font-weight', getFontWeight(indice))
+            .text("+" + value).transition(d3.expOut).duration(750 * (indice))
+            .style('opacity', 0)
+            .attr('x', Number(mouse[0]) + 40)
+            .attr('y', Number(mouse[1]) + 40)
+            .on('end', function() {
+                d3.select(this).remove();
+            });
     }
     /**
      * if strong, should return 900 and then decrease
