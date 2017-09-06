@@ -76,7 +76,7 @@ function ShootGame(params) {
     function createData(){
         targetParams = new Array(_params.nbrTargetZone).fill();
         targetParams.forEach(function(element,index,arr){
-            var cur = (index === 0) ? ((arr.length - index) * defValue) + defValue : (arr.length - index) * defValue;                 
+            var cur = (index === 0) ? ((arr.length - index) * defValue) + defValue + 150 : (arr.length - index) * defValue;                 
             targetParams[index] = {_value:  cur};
             statsCount.push({ val: cur, hit: 0 })
         },this)
@@ -378,16 +378,19 @@ function ShootGame(params) {
     }
 
     function createDataTarget(nbrRings) {
-        var _d = new Array(nbrRings).fill();
-        var def = 25; // default circle value radius
+        // var _d = new Array(nbrRings).fill();
+        var def = defValue; // default circle value radius
         var _origin = {
             cx: randomDest('x'),
             cy: randomDest('y')
         };
-        var data = _d.map(function(element, index, arr) {
+        var _rev = targetParams.slice().reverse();
+
+        var data = _rev.map(function(element, index, arr) {
             return {
                 r: (def * index) + (def * (index + 1)), // set radius val
-                val: (index === 0) ? ((arr.length - index) * def) + def : (arr.length - index) * def, // set score value
+                //val: (index === 0) ? ((arr.length - index) * def) + def : (arr.length - index) * def, // set score value
+                val: element._value,
                 origin: _origin,
                 dest: {
                     cx: randomDest('x'),
