@@ -299,54 +299,84 @@ function ShootGame(params) {
 
         var _data = createDataTarget(_params.nbrTargetZone);
 
+        var _target = group.selectAll('circle[class="target"]').data(_data).enter()
+            .append('circle')
+            .attr('class', 'target')
+            .attr('r', function(d, i) { return d.r / _params.targetSizeRatio })
+            .attr('cx', function(d, i) { return d.origin.cx })
+            .attr('cy', function(d, i) { return d.origin.cy })
+            .style('fill', function(d) { return d.color })
+            .on('click, mousedown', function(d, i) {
+                d3.event.preventDefault();
+                var val = d.val
+                var _this = d3.select(this);
+                var _parent = d3.select(this.parentNode)
+                saveShootCoordinates(d3.mouse(this), _parent.node().getBBox())
+                countStats(val);
+                setTimeout(function() {
+                    explodeAnim(_this, val);
+                    destroyTarget(_parent);
+                    addCounter(Number(val));
+                }, 100);
+            })
+
         // create circle base on config number of rings
-        for (var i = _params.nbrTargetZone; i > 0; i--) {
+        // for (var i = _params.nbrTargetZone; i > 0; i--) {
 
-            console.log(',,,,', ((i + 1) * 25) / _params.targetSizeRatio);
+        //     console.log(',,,,', ((i + 1) * 25) / _params.targetSizeRatio);
 
-            var value = ((_params.nbrTargetZone - i) + 1) * 25;
-            var ring = group.append('circle')
-                .attr('_value', value)
-                .on('click, mousedown', function() {
-                    d3.event.preventDefault();
-                    var val = d3.select(this).attr('_value')
-                    var _this = d3.select(this);
-                    var _parent = d3.select(this.parentNode)
-                    saveShootCoordinates(d3.mouse(this), _parent.node().getBBox())
-                    countStats(val);
-                    setTimeout(function() {
-                        explodeAnim(_this, val);
-                        destroyTarget(_parent);
-                        addCounter(Number(val));
-                    }, 100);
-                })
-                .attr('r', ((i + 1) * 25) / _params.targetSizeRatio)
-                .attr('cx', center.cx)
-                .attr('cy', center.cy)
-                .style('fill', function() {
-                    return (i % 2 === 0) ? 'black' : 'red';
-                })
+        //     var value = ((_params.nbrTargetZone - i) + 1) * 25;
+        //     var ring = group.append('circle')
+        //         .attr('_value', value)
+        //         .on('click, mousedown', function() {
+        //             d3.event.preventDefault();
+        //             var val = d3.select(this).attr('_value')
+        //             var _this = d3.select(this);
+        //             var _parent = d3.select(this.parentNode)
+        //             saveShootCoordinates(d3.mouse(this), _parent.node().getBBox())
+        //             countStats(val);
+        //             setTimeout(function() {
+        //                 explodeAnim(_this, val);
+        //                 destroyTarget(_parent);
+        //                 addCounter(Number(val));
+        //             }, 100);
+        //         })
+        //         .attr('r', ((i + 1) * 25) / _params.targetSizeRatio)
+        //         .attr('cx', center.cx)
+        //         .attr('cy', center.cy)
+        //         .style('fill', function() {
+        //             return (i % 2 === 0) ? 'black' : 'red';
+        //         })
 
-            if (_params.isMoving) {
-                ring.transition(d3.easeCubicOut(.5)).duration(_params.removeAfter)
-                    .attr('cx', dest.cx)
-                    .attr('cy', dest.cy);
-            }
-        }
+        //     if (_params.isMoving) {
+        //         ring.transition(d3.easeCubicOut(.5)).duration(_params.removeAfter)
+        //             .attr('cx', dest.cx)
+        //             .attr('cy', dest.cy);
+        //     }
+        // }
     }
 
     function createDataTarget(nbrRings) {
-        var d = new Array(nbrRings).fill();
-        var def = 25;
-        var t = d.map(function(element, index, arr) {
+        var _d = new Array(nbrRings).fill();
+        var def = 25; // default circle value radius
+
+        var _origin = {
+            cx: randomDest('x'),
+            cy: randomDest('y')
+        };
+        var data = _d.map(function(element, index, arr) {
             return {
                 r: (def * index) + (def * (index + 1)), // set radius val
-                val: (index === 0) ? ((arr.length - index) * def) + def : (arr.length - index) * def // set score value
+                val: (index === 0) ? ((arr.length - index) * def) + def : (arr.length - index) * def, // set score value
+                origin: _origin,
+                dest: {
+                    cx: randomDest('x'),
+                    cy: randomDest('y')
+                },
+                color: (index % 2 === 0) ? 'black' : 'red'
             }
         }, this);
-
-        console.log(t)
-        debugger;
+        return data.reverse();
     }
 
     function saveShootCoordinates(mouse, bbox) {
