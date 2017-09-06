@@ -281,6 +281,22 @@ function ShootGame(params) {
                 d3.select(this).remove();
             });
 
+        // var _target = new Target({
+        //     nbrRings: _params.nbrTargetZone,
+        //     targetSize: _params.targetSizeRatio,
+        //     isMoving: _params.isMoving,
+        //     removeAfter: _params.removeAfter,
+        //     center: center,
+        //     dest: dest,
+        //     groupEl: group
+        // });
+
+        // _target.init();
+
+        // _target.ontargetShotEvent = function(e) {
+        //     console.log('Shot event', e);
+        // };
+
         // create circle base on config number of rings
         for (var i = _params.nbrTargetZone; i > 0; i--) {
             var value = ((_params.nbrTargetZone - i) + 1) * 25;
