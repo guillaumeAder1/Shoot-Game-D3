@@ -297,8 +297,13 @@ function ShootGame(params) {
         //     console.log('Shot event', e);
         // };
 
+        var _data = createDataTarget(_params.nbrTargetZone);
+
         // create circle base on config number of rings
         for (var i = _params.nbrTargetZone; i > 0; i--) {
+
+            console.log(',,,,', ((i + 1) * 25) / _params.targetSizeRatio);
+
             var value = ((_params.nbrTargetZone - i) + 1) * 25;
             var ring = group.append('circle')
                 .attr('_value', value)
@@ -328,6 +333,20 @@ function ShootGame(params) {
                     .attr('cy', dest.cy);
             }
         }
+    }
+
+    function createDataTarget(nbrRings) {
+        var d = new Array(nbrRings).fill();
+        var def = 25;
+        var t = d.map(function(element, index, arr) {
+            return {
+                r: (def * index) + (def * (index + 1)), // set radius val
+                val: (index === 0) ? ((arr.length - index) * def) + def : (arr.length - index) * def // set score value
+            }
+        }, this);
+
+        console.log(t)
+        debugger;
     }
 
     function saveShootCoordinates(mouse, bbox) {
