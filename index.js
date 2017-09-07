@@ -21,20 +21,6 @@ function ShootGame(params) {
     var defValue = 25;
     var originScore;
 
-    /**
-     * test var visibitly
-     */
-    this.test = 'toto'
-    this.fcTest = function(val) {
-        console.log(this, val, this.test, fontWeigthList)
-        testFc()
-    }
-    this.fcTest('okok');
-
-    function testFc() {
-        console.log('function test', fontWeigthList, this.test)
-    }
-
     this.init = function() {
         console.log('::master::');
         _params = params;
