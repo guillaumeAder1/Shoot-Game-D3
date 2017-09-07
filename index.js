@@ -36,7 +36,7 @@ function ShootGame(params) {
     }
 
     this.init = function() {
-        console.log('::refacto::');
+        console.log('::master::');
         _params = params;
         createDomElements();
         createData();
