@@ -36,20 +36,21 @@ function ShootGame(params) {
     }
 
     this.init = function() {
+        console.log('::refacto::');
         _params = params;
-        createDomElements();       
-        createData();             
+        createDomElements();
+        createData();
         if (_params.gameTimer) {
             createTimer(_params.gameTimer);
         }
         writeCounter();
         addGun();
         load();
-    }
+    };
     /**
      * initialize all dom element
      */
-    function createDomElements(){
+    function createDomElements() {
         counter = 0;
         counterDom = document.querySelector('#counter');
         // create svg
@@ -73,13 +74,13 @@ function ShootGame(params) {
     /**
      * create array to list score object and data
      */
-    function createData(){
+    function createData() {
         targetParams = new Array(_params.nbrTargetZone).fill();
-        targetParams.forEach(function(element,index,arr){
-            var cur = (index === 0) ? ((arr.length - index) * defValue) + defValue + 150 : (arr.length - index) * defValue;                 
-            targetParams[index] = {_value:  cur};
+        targetParams.forEach(function(element, index, arr) {
+            var cur = (index === 0) ? ((arr.length - index) * defValue) + defValue + 150 : (arr.length - index) * defValue;
+            targetParams[index] = { _value: cur };
             statsCount.push({ val: cur, hit: 0 })
-        },this)
+        }, this)
         targetParams.reverse();
     }
 
@@ -153,7 +154,6 @@ function ShootGame(params) {
                 },
                 r: 10
             });
-
         }
         return _d;
     }
@@ -202,31 +202,28 @@ function ShootGame(params) {
         $('#bulletCount').html("<h3><b>" + bulletCounter + "</b> bullets shot</h3>")
 
         // target vizu
-        
-            var _w = targetBBSize.w * 2;
-            var _h = targetBBSize.h * 2;
-            var target = d3.select('#targetVizu').append('svg')
-                .attr('width', _w + 'px')
-                .attr('height', _h + 'px')
-            target.append('circle')
-                .attr('r', _w / 2)
-                .attr('cx', _w / 2)
-                .attr('cy', _h / 2)
-                .style('fill', 'lightgreen')
-                .transition();
-        setTimeout(function(){
+        var _w = targetBBSize.w * 2;
+        var _h = targetBBSize.h * 2;
+        var target = d3.select('#targetVizu').append('svg')
+            .attr('width', _w + 'px')
+            .attr('height', _h + 'px')
+        target.append('circle')
+            .attr('r', _w / 2)
+            .attr('cx', _w / 2)
+            .attr('cy', _h / 2)
+            .style('fill', 'lightgreen')
+            .transition();
+        setTimeout(function() {
             target.selectAll('circle[class="marker"]').data(bulletsCoordinate).enter()
                 .append('circle')
                 .attr('class', 'marker')
                 .attr('r', 3)
                 .attr('cx', function(d, i) { return Math.floor(d.x) * 2 })
                 .attr('cy', -100)
-                .transition().delay(function(d,i){ return i * 70 })            
+                .transition().delay(function(d, i) { return i * 70 })
                 .attr('cx', function(d, i) { return Math.floor(d.x) * 2 })
                 .attr('cy', function(d, i) { return Math.floor(d.y) * 2 })
-        }, 500)
-        
-
+        }, 500);
 
         // by value hit
         var domStats = $('#reportStats');
@@ -264,11 +261,86 @@ function ShootGame(params) {
     function load() {
         var timer = setInterval(function() {
             if (!paused) {
-                createCircle();
+                createNewTarget();
                 writeCounter();
             }
         }, _params.displayDelay);
     }
+
+    /**
+     * Create traget circle vased on config
+     * nbrTargetZone represents the number of ring for the target, 
+     * every ring has a different score value
+     */
+    function createNewTarget() {
+        var _target = new Target({
+            _data: createDataTarget(_params.nbrTargetZone),
+            nbrRings: _params.nbrTargetZone,
+            targetSizeRatio: _params.targetSizeRatio,
+            isMoving: _params.isMoving,
+            removeAfter: _params.removeAfter,
+            svgContainer: container,
+            targetParams: targetParams,
+            shotCallback: targetCallback,
+            statsCount: statsCount
+        });
+        _target.init();
+    }
+    /**
+     * Fire after target is shot
+     * should return data for stats:
+     *  - score 
+     *  - shot position   
+     */
+    function targetCallback(bulletCoord, value) {
+        // store target size
+        if (!targetBBSize) {
+            targetBBSize = {
+                w: bulletCoord.bbox[0],
+                h: bulletCoord.bbox[1]
+            }
+        }
+        // save bullet coord
+        bulletsCoordinate.push(bulletCoord);
+        // add counter value by cat
+        countStats(value);
+        // add counter Point
+        addCounter(value)
+    }
+
+    function countStats(val) {
+        statsCount.forEach(function(element) {
+            if (element.val === Number(val)) {
+                element.hit += 1;
+            }
+        }, this);
+    }
+
+    function createDataTarget(nbrRings) {
+        // var _d = new Array(nbrRings).fill();
+        var def = defValue; // default circle value radius
+        var _origin = {
+            cx: randomDest('x'),
+            cy: randomDest('y')
+        };
+        var _dest = {
+            cx: randomDest('x'),
+            cy: randomDest('y')
+        };
+        var _rev = targetParams.slice().reverse();
+
+        var data = _rev.map(function(element, index, arr) {
+            return {
+                r: (def * index) + (def * (index + 1)), // set radius val
+                val: element._value,
+                origin: _origin,
+                dest: _dest,
+                color: (index % 2 === 0) ? 'black' : 'red'
+            }
+        }, this);
+        return data.reverse();
+    }
+
     /**
      * Generate a random detination for the target 
      * @param {String} axis - coulf 'x' or 'y' 
@@ -280,159 +352,7 @@ function ShootGame(params) {
             return Math.floor(Math.random() * screenSize.h)
         }
     }
-    /**
-     * Create traget circle vased on config
-     * nbrTargetZone represents the number of ring for the target, 
-     * every ring has a different score value
-     */
-    function createCircle() {
 
-        var center = {
-            cx: randomDest('x'),
-            cy: randomDest('y')
-        };
-        var group = container.append('g');
-        var dest = {
-            cx: randomDest('x'),
-            cy: randomDest('y')
-        };
-        // remove after limit time expires
-        group.transition().duration(_params.removeAfter)
-            .on('end', function() {
-                d3.select(this).remove();
-            });
-
-        // var _target = new Target({
-        //     nbrRings: _params.nbrTargetZone,
-        //     targetSize: _params.targetSizeRatio,
-        //     isMoving: _params.isMoving,
-        //     removeAfter: _params.removeAfter,
-        //     center: center,
-        //     dest: dest,
-        //     groupEl: group
-        // });
-
-        // _target.init();
-
-        // _target.ontargetShotEvent = function(e) {
-        //     console.log('Shot event', e);
-        // };
-
-        var _data = createDataTarget(_params.nbrTargetZone);
-
-        var _target = group.selectAll('circle[class="target"]').data(_data).enter()
-            .append('circle')
-            .attr('class', 'target')
-            .attr('r', function(d, i) { return d.r / _params.targetSizeRatio })
-            .attr('cx', function(d, i) { return d.origin.cx })
-            .attr('cy', function(d, i) { return d.origin.cy })
-            .style('fill', function(d) { return d.color })
-            .on('click, mousedown', function(d, i) {
-                d3.event.preventDefault();
-                var val = d.val
-                var _this = d3.select(this);
-                var _parent = d3.select(this.parentNode)
-                saveShootCoordinates(d3.mouse(this), _parent.node().getBBox())
-                countStats(val);
-                setTimeout(function() {
-                    explodeAnim(_this, val);
-                    destroyTarget(_parent);
-                    addCounter(Number(val));
-                }, 100);
-            })
-
-        // create circle base on config number of rings
-        // for (var i = _params.nbrTargetZone; i > 0; i--) {
-
-        //     console.log(',,,,', ((i + 1) * 25) / _params.targetSizeRatio);
-
-        //     var value = ((_params.nbrTargetZone - i) + 1) * 25;
-        //     var ring = group.append('circle')
-        //         .attr('_value', value)
-        //         .on('click, mousedown', function() {
-        //             d3.event.preventDefault();
-        //             var val = d3.select(this).attr('_value')
-        //             var _this = d3.select(this);
-        //             var _parent = d3.select(this.parentNode)
-        //             saveShootCoordinates(d3.mouse(this), _parent.node().getBBox())
-        //             countStats(val);
-        //             setTimeout(function() {
-        //                 explodeAnim(_this, val);
-        //                 destroyTarget(_parent);
-        //                 addCounter(Number(val));
-        //             }, 100);
-        //         })
-        //         .attr('r', ((i + 1) * 25) / _params.targetSizeRatio)
-        //         .attr('cx', center.cx)
-        //         .attr('cy', center.cy)
-        //         .style('fill', function() {
-        //             return (i % 2 === 0) ? 'black' : 'red';
-        //         })
-
-        //     if (_params.isMoving) {
-        //         ring.transition(d3.easeCubicOut(.5)).duration(_params.removeAfter)
-        //             .attr('cx', dest.cx)
-        //             .attr('cy', dest.cy);
-        //     }
-        // }
-    }
-
-    function createDataTarget(nbrRings) {
-        // var _d = new Array(nbrRings).fill();
-        var def = defValue; // default circle value radius
-        var _origin = {
-            cx: randomDest('x'),
-            cy: randomDest('y')
-        };
-        var _rev = targetParams.slice().reverse();
-
-        var data = _rev.map(function(element, index, arr) {
-            return {
-                r: (def * index) + (def * (index + 1)), // set radius val
-                //val: (index === 0) ? ((arr.length - index) * def) + def : (arr.length - index) * def, // set score value
-                val: element._value,
-                origin: _origin,
-                dest: {
-                    cx: randomDest('x'),
-                    cy: randomDest('y')
-                },
-                color: (index % 2 === 0) ? 'black' : 'red'
-            }
-        }, this);
-        return data.reverse();
-    }
-
-    function saveShootCoordinates(mouse, bbox) {
-        bulletsCoordinate.push({
-            x: mouse[0] - bbox.x,
-            y: mouse[1] - bbox.y,
-            bbox: [bbox.width, bbox.height]
-        });
-        if(!targetBBSize){
-            targetBBSize = {
-                w: bbox.width,
-                h: bbox.height
-            }
-        }        
-    }
-
-    function countStats(val) {
-        statsCount.forEach(function(element) {
-            if (element.val === Number(val)) {
-                element.hit += 1;
-            }
-        }, this);
-    }
-    /**
-     * remove the target from dom
-     * @param {d3 object} element - the target shot 
-     */
-    function destroyTarget(element) {
-        element.transition().duration(250)
-            .attr('r', 1)
-            .style('opacity', 0)
-            .remove();
-    }
     /*** 
      * @param {number} value - count the score, depend of the ring's value  
      */
@@ -440,81 +360,5 @@ function ShootGame(params) {
         targetShot += 1;
         counter += value;
         counterDom.innerHTML = counter;
-    }
-
-    /**
-     * @param {d3 element} element 
-     * @param {Number} value - value of the ring touched
-     */
-    function explodeAnim(element, value) {
-        var mouse = [
-            element.attr('cx'),
-            element.attr('cy')
-        ];
-        // use the indice to multiply effect depending of the accuracy
-        var indice = getIndexFromValue(value) + 1;
-
-        displayScoreHit(mouse, indice, value);
-
-        // Create random destination bubbles
-        for (var i = 0; i < Math.floor(Math.random() * 1000) + (indice); i++) {
-            // Create random numbers for translation of circles
-            var randomNumber = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 100) * (indice));
-            var randomNumber2 = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 50) * (indice));
-            var color = (Math.floor(Math.random() * 10) % 2 === 0) ? 'black' : 'red';
-            // Create circles
-            container.append('circle')
-                .attr('cx', mouse[0])
-                .attr('cy', mouse[1])
-                .attr('r', Math.random() * (5 * ((indice / 2))))
-                .attr('fill', color)
-                .attr('opacity', Math.random() * 5)
-                .transition(d3.easeCubicOut())
-                .duration(500).delay(function() { return i * 1;})
-                .attr('transform', 'translate(' + randomNumber + ',' + randomNumber2 + ')')
-                .attr('opacity', 0)
-                .on('end', function() {
-                    d3.select(this).remove()
-                });
-        }
-    }
-    /**
-     * Score hit marker
-     * @param {array} mouse - mouse coord
-     * @param {int} indice - multiplier
-     * @param {value} value - score number
-     */
-    function displayScoreHit(mouse, indice, value){
-        container.append('text')
-            .attr('x', Number(mouse[0]) + 20)
-            .attr('y', Number(mouse[1]) + 20)
-            .attr("font-family", "sans-serif")
-            .attr("font-size", (fontSize + indice) + 'px')
-            .attr('font-weight', getFontWeight(indice))
-            .text("+" + value).transition(d3.expOut).duration(750 * (indice))
-            .style('opacity', 0)
-            .attr('x', Number(mouse[0]) + 40)
-            .attr('y', Number(mouse[1]) + 40)
-            .on('end', function() {
-                d3.select(this).remove();
-            });
-    }
-    /**
-     * if strong, should return 900 and then decrease
-     * @param {Number} indice - multipier for font weight based on indice value
-     */
-    function getFontWeight(indice) {
-        return fontWeigthList[targetParams.length - indice];
-    }
-
-    /**
-     * return the index of the rings value []
-     * @param {Number} val - ring touched value   
-     */
-    function getIndexFromValue(val) {
-        var value = Number(val);
-        return targetParams.findIndex(function(element, i) {
-            return (element._value === value)
-        }, this);
     }
 }
