@@ -36,20 +36,21 @@ function ShootGame(params) {
     }
 
     this.init = function() {
+        console.log('::Refacto::');
         _params = params;
-        createDomElements();       
-        createData();             
+        createDomElements();
+        createData();
         if (_params.gameTimer) {
             createTimer(_params.gameTimer);
         }
         writeCounter();
         addGun();
         load();
-    }
+    };
     /**
      * initialize all dom element
      */
-    function createDomElements(){
+    function createDomElements() {
         counter = 0;
         counterDom = document.querySelector('#counter');
         // create svg
@@ -73,13 +74,13 @@ function ShootGame(params) {
     /**
      * create array to list score object and data
      */
-    function createData(){
+    function createData() {
         targetParams = new Array(_params.nbrTargetZone).fill();
-        targetParams.forEach(function(element,index,arr){
-            var cur = (index === 0) ? ((arr.length - index) * defValue) + defValue + 150 : (arr.length - index) * defValue;                 
-            targetParams[index] = {_value:  cur};
+        targetParams.forEach(function(element, index, arr) {
+            var cur = (index === 0) ? ((arr.length - index) * defValue) + defValue + 150 : (arr.length - index) * defValue;
+            targetParams[index] = { _value: cur };
             statsCount.push({ val: cur, hit: 0 })
-        },this)
+        }, this)
         targetParams.reverse();
     }
 
@@ -202,30 +203,30 @@ function ShootGame(params) {
         $('#bulletCount').html("<h3><b>" + bulletCounter + "</b> bullets shot</h3>")
 
         // target vizu
-        
-            var _w = targetBBSize.w * 2;
-            var _h = targetBBSize.h * 2;
-            var target = d3.select('#targetVizu').append('svg')
-                .attr('width', _w + 'px')
-                .attr('height', _h + 'px')
-            target.append('circle')
-                .attr('r', _w / 2)
-                .attr('cx', _w / 2)
-                .attr('cy', _h / 2)
-                .style('fill', 'lightgreen')
-                .transition();
-        setTimeout(function(){
+
+        var _w = targetBBSize.w * 2;
+        var _h = targetBBSize.h * 2;
+        var target = d3.select('#targetVizu').append('svg')
+            .attr('width', _w + 'px')
+            .attr('height', _h + 'px')
+        target.append('circle')
+            .attr('r', _w / 2)
+            .attr('cx', _w / 2)
+            .attr('cy', _h / 2)
+            .style('fill', 'lightgreen')
+            .transition();
+        setTimeout(function() {
             target.selectAll('circle[class="marker"]').data(bulletsCoordinate).enter()
                 .append('circle')
                 .attr('class', 'marker')
                 .attr('r', 3)
                 .attr('cx', function(d, i) { return Math.floor(d.x) * 2 })
                 .attr('cy', -100)
-                .transition().delay(function(d,i){ return i * 70 })            
+                .transition().delay(function(d, i) { return i * 70 })
                 .attr('cx', function(d, i) { return Math.floor(d.x) * 2 })
                 .attr('cy', function(d, i) { return Math.floor(d.y) * 2 })
         }, 500)
-        
+
 
 
         // by value hit
@@ -408,12 +409,12 @@ function ShootGame(params) {
             y: mouse[1] - bbox.y,
             bbox: [bbox.width, bbox.height]
         });
-        if(!targetBBSize){
+        if (!targetBBSize) {
             targetBBSize = {
                 w: bbox.width,
                 h: bbox.height
             }
-        }        
+        }
     }
 
     function countStats(val) {
@@ -470,7 +471,7 @@ function ShootGame(params) {
                 .attr('fill', color)
                 .attr('opacity', Math.random() * 5)
                 .transition(d3.easeCubicOut())
-                .duration(500).delay(function() { return i * 1;})
+                .duration(500).delay(function() { return i * 1; })
                 .attr('transform', 'translate(' + randomNumber + ',' + randomNumber2 + ')')
                 .attr('opacity', 0)
                 .on('end', function() {
@@ -484,7 +485,7 @@ function ShootGame(params) {
      * @param {int} indice - multiplier
      * @param {value} value - score number
      */
-    function displayScoreHit(mouse, indice, value){
+    function displayScoreHit(mouse, indice, value) {
         container.append('text')
             .attr('x', Number(mouse[0]) + 20)
             .attr('y', Number(mouse[1]) + 20)
