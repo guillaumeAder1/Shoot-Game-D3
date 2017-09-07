@@ -193,6 +193,7 @@ function ShootGame(params) {
         var target = d3.select('#targetVizu').append('svg')
             .attr('width', _w + 'px')
             .attr('height', _h + 'px')
+
         target.append('circle')
             .attr('r', _w / 2)
             .attr('cx', _w / 2)

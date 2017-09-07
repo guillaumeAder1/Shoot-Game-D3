@@ -12,7 +12,7 @@ var Target = function(param) {
     this.init = function() {
         _params = param;
         this.createGroup()
-        this.generateTarget(_params._data, _params.targetSizeRatio, _params.isMoving, _params.removeAfter);
+        
     }
 
     /**
@@ -25,13 +25,13 @@ var Target = function(param) {
             .on('end', function() {
                 d3.select(this).remove();
             });
-
+        this.generateTarget(this.group, _params._data, _params.targetSizeRatio, _params.isMoving, _params.removeAfter);
     };
     /**
      * create the target
      */
-    this.generateTarget = function(data, ratio, isMoving, delay) {
-        var _target = this.group.selectAll('circle[class="target"]').data(data).enter()
+    this.generateTarget = function(group, data, ratio, isMoving, delay) {
+        var _target = group.selectAll('circle[class="target"]').data(data).enter()
             .append('circle')
             .attr('class', 'target')
             .attr('r', function(d, i) { return d.r / ratio })
@@ -40,11 +40,10 @@ var Target = function(param) {
             .style('fill', function(d) { return d.color })
             .on('click, mousedown', function(d, i) {
                 targetExplode(
-                    d,
-                    i,
+                    d,                   
                     d3.select(this),
                     d3.select(this.parentNode),
-                    d3.mouse(this))
+                    d3.mouse(this));
             });
 
         if (isMoving) {
@@ -54,12 +53,12 @@ var Target = function(param) {
         }
     }
 
-    function targetExplode(d, i, _this, _parent, _mouse) {
+    function targetExplode(d, _this, _parent, _mouse) {
         d3.event.preventDefault();
         var val = d.val;
         var curPos = saveShootCoordinates(_mouse, _parent.node().getBBox())
         setTimeout(function() {
-            explodeAnim(_this, val);
+            explodeAnim(_mouse, val);
             destroyTarget(_parent);
             _params.shotCallback(curPos, val);
         }, 100);
@@ -89,11 +88,8 @@ var Target = function(param) {
      * @param {d3 element} element 
      * @param {Number} value - value of the ring touched
      */
-    function explodeAnim(element, value) {
-        var mouse = [
-            element.attr('cx'),
-            element.attr('cy')
-        ];
+    function explodeAnim(element, value) {      
+        var mouse = element
         // use the indice to multiply effect depending of the accuracy
         var indice = getIndexFromValue(value) + 1;
         displayScoreHit(mouse, indice, value);
@@ -107,7 +103,7 @@ var Target = function(param) {
             _params.svgContainer.append('circle')
                 .attr('cx', mouse[0])
                 .attr('cy', mouse[1])
-                .attr('r', Math.random() * (5 * ((indice / 2))))
+                .attr('r', Math.random() * (5 * ((indice / 1.6))))
                 .attr('fill', color)
                 .attr('opacity', Math.random() * 5)
                 .transition(d3.easeCubicOut())
