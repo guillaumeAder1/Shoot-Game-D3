@@ -4,7 +4,7 @@ d3.v4
 
 'shoot the target'
 
-[View demo](https://guillaumeader1.github.io/Shoot-Game-D3/)
+[View demo](https://guillaumeader1.github.io/shoot-game-d3js/)
 
 
 dependencies:
