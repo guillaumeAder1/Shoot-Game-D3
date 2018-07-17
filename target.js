@@ -1,28 +1,22 @@
-var Target = function(param) {
+var Target = function (param) {
     var _params;
     this.group;
     var fontSize = 12;
     var fontWeigthList = [900, 800, 700, 600, 500, 400, 300, 200, 100];
-    var bulletsCoordinate = [];
-    var targetBBSize;
-    var group;
-    var _bulletsCoordinate;
 
-
-    this.init = function() {
+    this.init = function () {
         _params = param;
         this.createGroup()
-        
     }
 
     /**
      * creat <g> containing the target
      */
-    this.createGroup = function() {
+    this.createGroup = function () {
         this.group = _params.svgContainer.append('g');
         // remove after limit time expires
         this.group.transition().duration(_params.removeAfter)
-            .on('end', function() {
+            .on('end', function () {
                 d3.select(this).remove();
             });
         this.generateTarget(this.group, _params._data, _params.targetSizeRatio, _params.isMoving, _params.removeAfter);
@@ -30,26 +24,25 @@ var Target = function(param) {
     /**
      * create the target
      */
-    this.generateTarget = function(group, data, ratio, isMoving, delay) {
+    this.generateTarget = function (group, data, ratio, isMoving, delay) {
         var _target = group.selectAll('circle[class="target"]').data(data).enter()
             .append('circle')
             .attr('class', 'target')
-            .attr('r', function(d, i) { return d.r / ratio })
-            .attr('cx', function(d, i) { return d.origin.cx })
-            .attr('cy', function(d, i) { return d.origin.cy })
-            .style('fill', function(d) { return d.color })
-            .on('click, mousedown', function(d, i) {
+            .attr('r', function (d, i) { return d.r / ratio })
+            .attr('cx', function (d, i) { return d.origin.cx })
+            .attr('cy', function (d, i) { return d.origin.cy })
+            .style('fill', function (d) { return d.color })
+            .on('click, mousedown', function (d, i) {
                 targetExplode(
-                    d,                   
+                    d,
                     d3.select(this),
                     d3.select(this.parentNode),
                     d3.mouse(this));
             });
-
         if (isMoving) {
             _target.transition(d3.easeCubicOut(.5)).duration(delay)
-                .attr('cx', function(d) { return d.dest.cx })
-                .attr('cy', function(d) { return d.dest.cy });
+                .attr('cx', function (d) { return d.dest.cx })
+                .attr('cy', function (d) { return d.dest.cy });
         }
     }
 
@@ -57,18 +50,19 @@ var Target = function(param) {
         d3.event.preventDefault();
         var val = d.val;
         var curPos = saveShootCoordinates(_mouse, _parent.node().getBBox())
-        setTimeout(function() {
+        setTimeout(function () {
             explodeAnim(_mouse, val);
             destroyTarget(_parent);
             _params.shotCallback(curPos, val);
         }, 100);
+
     }
     /**
      * 
      * @param {Array} mouse - mouse pos
      * @param {*} bbox - boundary box of the target <g> element 
      */
-    var saveShootCoordinates = function(mouse, bbox) {
+    var saveShootCoordinates = function (mouse, bbox) {
         return {
             x: mouse[0] - bbox.x,
             y: mouse[1] - bbox.y,
@@ -76,19 +70,13 @@ var Target = function(param) {
         }
     }
 
-    function countStats(val) {
-        _params.statsCount.forEach(function(element) {
-            if (element.val === Number(val)) {
-                element.hit += 1;
-            }
-        }, this);
-    }
+
 
     /**
      * @param {d3 element} element 
      * @param {Number} value - value of the ring touched
      */
-    function explodeAnim(element, value) {      
+    function explodeAnim(element, value) {
         var mouse = element
         // use the indice to multiply effect depending of the accuracy
         var indice = getIndexFromValue(value) + 1;
@@ -107,10 +95,10 @@ var Target = function(param) {
                 .attr('fill', color)
                 .attr('opacity', Math.random() * 5)
                 .transition(d3.easeCubicOut())
-                .duration(500).delay(function() { return i * 1; })
+                .duration(500).delay(function () { return i * 1; })
                 .attr('transform', 'translate(' + randomNumber + ',' + randomNumber2 + ')')
                 .attr('opacity', 0)
-                .on('end', function() {
+                .on('end', function () {
                     d3.select(this).remove()
                 });
         }
@@ -132,7 +120,7 @@ var Target = function(param) {
             .style('opacity', 0)
             .attr('x', Number(mouse[0]) + 40)
             .attr('y', Number(mouse[1]) + 40)
-            .on('end', function() {
+            .on('end', function () {
                 d3.select(this).remove();
             });
     }
@@ -152,7 +140,7 @@ var Target = function(param) {
      */
     function getIndexFromValue(val) {
         var value = Number(val);
-        return _params.targetParams.findIndex(function(element, i) {
+        return _params.targetParams.findIndex(function (element, i) {
             return (element._value === value)
         }, this);
     }

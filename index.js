@@ -10,25 +10,17 @@ function ShootGame(params) {
     var targetShot = 0;
     var paused = false;
     var targetParams;
-    var fontSize = 12;
-    var fontWeigthList = [900, 800, 700, 600, 500, 400, 300, 200, 100];
-    var timerDom;
-    var timerLimit;
     var statsCount = [];
     var bulletCounter = 0;
     var bulletsCoordinate = [];
     var targetBBSize;
     var defValue = 25;
-    var originScore;
 
-    this.init = function() {
-        console.log('::master::');
+    this.init = function () {
         _params = params;
         createDomElements();
         createData();
-        if (_params.gameTimer) {
-            createTimer(_params.gameTimer);
-        }
+        _params.gameTimer && createTimer(_params.gameTimer);
         writeCounter();
         addGun();
         load();
@@ -52,7 +44,7 @@ function ShootGame(params) {
         // change cursor
         document.body.style.cursor = 'crosshair';
         // listener for pause event
-        document.addEventListener('keyup', function(e) {
+        document.addEventListener('keyup', function (e) {
             if (e.keyCode !== 13) { return; }
             paused = !paused;
         });
@@ -62,7 +54,7 @@ function ShootGame(params) {
      */
     function createData() {
         targetParams = new Array(_params.nbrTargetZone).fill();
-        targetParams.forEach(function(element, index, arr) {
+        targetParams.forEach(function (element, index, arr) {
             var cur = (index === 0) ? ((arr.length - index) * defValue) + defValue + 150 : (arr.length - index) * defValue;
             targetParams[index] = { _value: cur };
             statsCount.push({ val: cur, hit: 0 })
@@ -81,17 +73,16 @@ function ShootGame(params) {
             var bullet = container.selectAll('circle[class="bullet"]').data(bullets).enter()
             bullet.append('circle')
                 .attr('class', 'bullet')
-                .attr('r', function(d) { return d.r })
-                .attr('cx', function(d) { return d.origin.x })
-                .attr('cy', function(d) { return d.origin.y })
-                .transition().delay(function(d, i) { return i * 2 })
-                .attr('cx', function(d) { return d.destination.x })
-                .attr('cy', function(d) { return d.destination.y })
-                .attr('r', function(d) { return d.r / 2 })
+                .attr('r', function (d) { return d.r })
+                .attr('cx', function (d) { return d.origin.x })
+                .attr('cy', function (d) { return d.origin.y })
+                .transition().delay(function (d, i) { return i * 2 })
+                .attr('cx', function (d) { return d.destination.x })
+                .attr('cy', function (d) { return d.destination.y })
+                .attr('r', function (d) { return d.r / 2 })
                 .style('opacity', 0.5)
-                .on('end', function() {
+                .on('end', function () {
                     d3.select(this).remove();
-                    //repeat().bind(container);
                 });
 
             // if (_params.gunType === 'auto') {
@@ -156,7 +147,7 @@ function ShootGame(params) {
             .attr('class', 'timeLeft')
             .text('Time left: ' + value);
         var timerValueDom = document.querySelector('.timeLeft');
-        var timeTimer = setInterval(function() {
+        var timeTimer = setInterval(function () {
             value = value - 1
             timerValueDom.innerHTML = 'Time left: ' + value;
             if (value === 0) {
@@ -200,21 +191,21 @@ function ShootGame(params) {
             .attr('cy', _h / 2)
             .style('fill', 'lightgreen')
             .transition();
-        setTimeout(function() {
+        setTimeout(function () {
             target.selectAll('circle[class="marker"]').data(bulletsCoordinate).enter()
                 .append('circle')
                 .attr('class', 'marker')
                 .attr('r', 3)
-                .attr('cx', function(d, i) { return Math.floor(d.x) * 2 })
+                .attr('cx', function (d, i) { return Math.floor(d.x) * 2 })
                 .attr('cy', -100)
-                .transition().delay(function(d, i) { return i * 70 })
-                .attr('cx', function(d, i) { return Math.floor(d.x) * 2 })
-                .attr('cy', function(d, i) { return Math.floor(d.y) * 2 })
+                .transition().delay(function (d, i) { return i * 70 })
+                .attr('cx', function (d, i) { return Math.floor(d.x) * 2 })
+                .attr('cy', function (d, i) { return Math.floor(d.y) * 2 })
         }, 500);
 
         // by value hit
         var domStats = $('#reportStats');
-        statsCount.forEach(function(element) {
+        statsCount.forEach(function (element) {
             domStats.append("<div class'row'><span class='stat-cat'>" + element.val + "</span>: <span class='stat-val'>" + element.hit + "</span></div>")
         }, this);
 
@@ -246,7 +237,7 @@ function ShootGame(params) {
      * define in the config {displayDelay}
      */
     function load() {
-        var timer = setInterval(function() {
+        var timer = setInterval(function () {
             if (!paused) {
                 createNewTarget();
                 writeCounter();
@@ -296,7 +287,7 @@ function ShootGame(params) {
     }
 
     function countStats(val) {
-        statsCount.forEach(function(element) {
+        statsCount.forEach(function (element) {
             if (element.val === Number(val)) {
                 element.hit += 1;
             }
@@ -316,7 +307,7 @@ function ShootGame(params) {
         };
         var _rev = targetParams.slice().reverse();
 
-        var data = _rev.map(function(element, index, arr) {
+        var data = _rev.map(function (element, index, arr) {
             return {
                 r: (def * index) + (def * (index + 1)), // set radius val
                 val: element._value,
@@ -348,4 +339,4 @@ function ShootGame(params) {
         counter += value;
         counterDom.innerHTML = counter;
     }
-}
+};
