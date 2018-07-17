@@ -82,11 +82,13 @@ var Target = function (param) {
         var indice = getIndexFromValue(value) + 1;
         displayScoreHit(mouse, indice, value);
         // Create random destination bubbles
+
+        var colors = (_params.colors) ? _params.colors : ['black', 'red']
         for (var i = 0; i < Math.floor(Math.random() * 1000) + (indice); i++) {
             // Create random numbers for translation of circles
             var randomNumber = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 100) * (indice));
             var randomNumber2 = Math.floor((Math.random() < 0.5 ? -1 : 1) * (Math.random() * 50) * (indice));
-            var color = (Math.floor(Math.random() * 10) % 2 === 0) ? 'black' : 'red';
+            var color = (Math.floor(Math.random() * 10) % 2 === 0) ? colors[0] : colors[1];
             // Create circles
             _params.svgContainer.append('circle')
                 .attr('cx', mouse[0])

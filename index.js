@@ -258,7 +258,8 @@ function ShootGame(params) {
             svgContainer: container,
             targetParams: targetParams,
             shotCallback: targetCallback,
-            statsCount: statsCount
+            statsCount: statsCount,
+            colors: _params.colors
         });
         _target.init();
     }
@@ -303,6 +304,7 @@ function ShootGame(params) {
             cy: randomDest('y')
         };
         var _rev = targetParams.slice().reverse();
+        var colors = (_params.colors) ? _params.colors : ['black', 'red'];
 
         var data = _rev.map(function (element, index, arr) {
             return {
@@ -310,7 +312,7 @@ function ShootGame(params) {
                 val: element._value,
                 origin: _origin,
                 dest: _dest,
-                color: (index % 2 === 0) ? 'black' : 'red'
+                color: (index % 2 === 0) ? colors[0] : colors[1]
             }
         }, this);
         return data.reverse();
