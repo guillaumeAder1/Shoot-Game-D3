@@ -14,7 +14,7 @@ function ShootGame(params) {
     var bulletCounter = 0;
     var bulletsCoordinate = [];
     var targetBBSize;
-    var defValue = window.innerWidth / 25;
+    var defValue = 25;
     // var defValue = ((window.innerWidth / 25) + (innerHeight / 25) / 2);
 
     // 
