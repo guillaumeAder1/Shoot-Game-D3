@@ -84,11 +84,7 @@ function ShootGame(params) {
                 .on('end', function () {
                     d3.select(this).remove();
                 });
-
-            // if (_params.gunType === 'auto') {
-            //     bullet.on('end', repeat);
-            // }
-        })
+        });
     }
 
     /**
@@ -168,11 +164,13 @@ function ShootGame(params) {
         // percentage hit
         var v = targetCounter / targetShot;
         var res = 100 / v;
-        var percDom = $('#percentage').html("<h3><b>" + Math.floor(res) + "</b>% hit</h3>");
+        $('#percentage').html("<h3><b>" + Math.floor(res) + "</b>% hit</h3>");
 
-        // per seconde // need to to another hidden timer to calculate when no game limite
+        // per seconde 
+        // TODO need to to another hidden timer to calculate when no game limite
         if (_params.gameTimer) {
-            var preMinDom = $('#scorePermin').html("<h3><b>" + Math.floor(counter / _params.gameTimer) + "</b> pts/sec</h3>");
+            var ti = Math.floor(counter / _params.gameTimer)
+            $('#scorePermin').html("<h3><b>" + ti + "</b> pts/sec</h3>");
         }
 
         // bullet counter
@@ -295,7 +293,6 @@ function ShootGame(params) {
     }
 
     function createDataTarget(nbrRings) {
-        // var _d = new Array(nbrRings).fill();
         var def = defValue; // default circle value radius
         var _origin = {
             cx: randomDest('x'),

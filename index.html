@@ -17,10 +17,9 @@
     <div id="svg"></div>
 
 
-    <!-- Modal -->
+    <!-- Modal Results -->
     <div class="modal fade" id="myModal" role="dialog">
         <div class="modal-dialog">
-
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
@@ -39,6 +38,40 @@
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+
+    <!-- Modal Start -->
+    <div class="modal fade" id="startGame" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Starting...</h4>
+                    <h6>Select game type</h6>
+                </div>
+                <div class="modal-body">
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-primary practice">
+                            <input type="radio" name="options" id="option0" autocomplete="off" > Practice
+                        </label>
+                        <label class="btn btn-primary easy">
+                            <input type="radio" name="options" id="option1" autocomplete="off" > Easy
+                        </label>
+                        <label class="btn btn-primary medium">
+                            <input type="radio" name="options" id="option2" autocomplete="off"> Medium
+                        </label>
+                        <label class="btn btn-primary hard">
+                            <input type="radio" name="options" id="option3" autocomplete="off"> Hard
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
 
         </div>
     </div>
@@ -51,18 +84,71 @@
     <script src="index.js"></script>
     <script src="target.js"></script>
     <script>
-        var t = new ShootGame({
-            displayDelay: 1000, // target appears every...
-            removeAfter: 6000, // target disapear after ...
-            isMoving: true, // target moves or not
-            nbrTargetZone: 5, // number of rings in the target ==> max should be 9 to match with font weight multiplier 
-            targetSizeRatio: 6, // lower target size ( 1 => bigger, 6 = smaller and so on)
-            gameTimer: 15, // could be false or Number, number = second, false, no timer 
-            gunType: 'single' // define fire rate mode: 'single' - 'auto' - 'shotgun' ...maybe 'bomb'
-        })
-        t.init();
+        $(document).ready(function() {
 
-        console.log(t)
+            $("#startGame").modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            $('#startGame label.btn').on('click', function(e) {
+                var game;
+                var mode = e.target.classList[2]
+                switch (mode) {
+                    case 'practice':
+                        game = new ShootGame({
+                            displayDelay: 1000, // target appears every...
+                            removeAfter: 6000, // target disapear after ...
+                            isMoving: true, // target moves or not
+                            nbrTargetZone: 5, // number of rings in the target ==> max should be 9 to match with font weight multiplier 
+                            targetSizeRatio: 6, // lower target size ( 1 => bigger, 6 = smaller and so on)
+                            gameTimer: false, // could be false or Number, number = second, false, no timer 
+                            gunType: 'single' // define fire rate mode: 'single' - 'auto' - 'shotgun' ...maybe 'bomb'
+                        })
+
+                        break;
+                    case 'easy':
+                        game = new ShootGame({
+                            displayDelay: 1000, // target appears every...
+                            removeAfter: 7000, // target disapear after ...
+                            isMoving: false, // target moves or not
+                            nbrTargetZone: 4, // number of rings in the target ==> max should be 9 to match with font weight multiplier 
+                            targetSizeRatio: 6, // lower target size ( 1 => bigger, 6 = smaller and so on)
+                            gameTimer: 15, // could be false or Number, number = second, false, no timer 
+                            gunType: 'single' // define fire rate mode: 'single' - 'auto' - 'shotgun' ...maybe 'bomb'
+                        })
+                        break;
+                    case 'medium':
+                        game = new ShootGame({
+                            displayDelay: 1000, // target appears every...
+                            removeAfter: 6000, // target disapear after ...
+                            isMoving: true, // target moves or not
+                            nbrTargetZone: 5, // number of rings in the target ==> max should be 9 to match with font weight multiplier 
+                            targetSizeRatio: 6, // lower target size ( 1 => bigger, 6 = smaller and so on)
+                            gameTimer: 15, // could be false or Number, number = second, false, no timer 
+                            gunType: 'single' // define fire rate mode: 'single' - 'auto' - 'shotgun' ...maybe 'bomb'
+                        })
+                        break;
+                    case 'hard':
+                        game = new ShootGame({
+                            displayDelay: 750, // target appears every...
+                            removeAfter: 3000, // target disapear after ...
+                            isMoving: true, // target moves or not
+                            nbrTargetZone: 7, // number of rings in the target ==> max should be 9 to match with font weight multiplier 
+                            targetSizeRatio: 5, // lower target size ( 1 => bigger, 6 = smaller and so on)
+                            gameTimer: 15, // could be false or Number, number = second, false, no timer 
+                            gunType: 'single' // define fire rate mode: 'single' - 'auto' - 'shotgun' ...maybe 'bomb'
+                        })
+                        break;
+
+                    default:
+                        break;
+                }
+                $('#startGame').modal('hide')
+                game.init()
+            })
+
+        });
     </script>
 
 </body>
