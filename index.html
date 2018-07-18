@@ -27,15 +27,33 @@
                     <h4 class="modal-title">Game Over</h4>
                 </div>
                 <div class="modal-body">
-                    <p>Stats:</p>
-                    <div id="scorePermin"></div>
-                    <div id="percentage"></div>
-                    <div id="bulletCount"></div>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <span id="scorePermin" class="badge">0</span> Score per minute(s)
+                        </li>
+                        <li class="list-group-item">
+                            <span id="percentage" class="badge">0</span> Ratio targets shot
+                        </li>
+                        <li class="list-group-item">
+                            <span id="bulletCount" class="badge">0</span> Bullets shot
+                        </li>
+                    </ul>
+
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Value</th>
+                                <th>Hit</th>
+                            </tr>
+                        </thead>
+                        <tbody id='reportStats'>
+                        </tbody>
+                    </table>
                     <div id='targetVizu'></div>
-                    <div id='reportStats'></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button id="playAgain" type="button" class="btn btn-primary" data-dismiss="modal">play again</button>
                 </div>
             </div>
         </div>
@@ -86,6 +104,10 @@
     <script>
         $(document).ready(function() {
 
+            $('#playAgain').on('click', function() {
+                window.location.reload(true)
+            })
+
             $("#startGame").modal({
                 backdrop: 'static',
                 keyboard: false
@@ -115,7 +137,7 @@
                             isMoving: false, // target moves or not
                             nbrTargetZone: 5, // number of rings in the target ==> max should be 9 to match with font weight multiplier 
                             targetSizeRatio: 4, // lower target size ( 1 => bigger, 6 = smaller and so on)
-                            gameTimer: 15, // could be false or Number, number = second, false, no timer 
+                            gameTimer: 5, // could be false or Number, number = second, false, no timer 
                             gunType: 'single', // define fire rate mode: 'single' - 'auto' - 'shotgun' ...maybe 'bomb'
                             colors: ['black', '#3aa0ff']
                         })

@@ -167,17 +167,17 @@ function ShootGame(params) {
         // percentage hit
         var v = targetCounter / targetShot;
         var res = 100 / v;
-        $('#percentage').html("<h3><b>" + Math.floor(res) + "</b>% hit</h3>");
+        $('#percentage').text(Math.floor(res) + "%");
 
         // per seconde 
         // TODO need to to another hidden timer to calculate when no game limite
         if (_params.gameTimer) {
             var ti = Math.floor(counter / _params.gameTimer)
-            $('#scorePermin').html("<h3><b>" + ti + "</b> pts/sec</h3>");
+            $('#scorePermin').text(ti + " pts");
         }
 
         // bullet counter
-        $('#bulletCount').html("<h3><b>" + bulletCounter + "</b> bullets shot</h3>")
+        $('#bulletCount').text(bulletCounter + "/" + targetShot);
 
         // target vizu
         var _w = targetBBSize.w * 2;
@@ -204,10 +204,10 @@ function ShootGame(params) {
                 .attr('cy', function (d, i) { return Math.floor(d.y) * 2 })
         }, 500);
 
-        // by value hit
+        // by value hit table
         var domStats = $('#reportStats');
         statsCount.forEach(function (element) {
-            domStats.append("<div class'row'><span class='stat-cat'>" + element.val + "</span>: <span class='stat-val'>" + element.hit + "</span></div>")
+            domStats.append("<tr><th scope='row'>" + element.val + "</th><td>" + element.hit + "</td></tr>")
         }, this);
 
     }
